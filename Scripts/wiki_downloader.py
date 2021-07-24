@@ -5,7 +5,7 @@ from nltk.stem.porter import *
 
 url_prefix = 'https://en.wikipedia.org/wiki/'
 
-def count(title, words):
+def count_words(title, words):
     counts = {}
     for word in words:
         counts[word] = 0
@@ -23,5 +23,3 @@ def count(title, words):
             counts[word] += 1
             
     return counts
-
-print(count('Khidr', ['green', 'angel']))
