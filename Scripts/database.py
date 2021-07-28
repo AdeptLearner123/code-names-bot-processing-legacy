@@ -9,7 +9,12 @@ ignore_ids = [
     14919, # ISBN
     23538754, # Wayback Machine
     883885, # OCLC
-    373399 # National diet library
+    373399, # National diet library
+    35566739, # Integrated Authority File
+    422994, # Digital object identifier
+    9898086, # Mint (newspaper)
+    #12418604, # Mount Olympus
+    #148363 # Ancient_Greek
 ]
 
 def title_to_id(title):
@@ -40,7 +45,7 @@ def fetch_all_links(page_ids):
         outgoing_links_str = row[1]
         incoming_links_str = row[2]
         page_links[page_id] = set()
-        
+
         for link_id in outgoing_links_str.split('|'):
             if link_id and int(link_id) not in ignore_ids:
                 link_id = int(link_id)
@@ -52,3 +57,4 @@ def fetch_all_links(page_ids):
                 page_links[page_id].add(link_id)
                 directions.add((link_id, page_id))
     return page_links, directions
+    

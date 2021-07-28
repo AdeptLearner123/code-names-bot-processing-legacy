@@ -6,9 +6,20 @@ from nltk.stem.porter import *
 url_prefix = 'https://en.wikipedia.org/wiki/'
 
 def count_words(title, words):
-    counts = {}
+    # Loch_Ness => Loch, Ness
+    word_parts = {}
+    parts = []
+
     for word in words:
-        counts[word] = 0
+        word = word.lower()
+        word_parts[word] = []
+        for part in word.lower().replace('_', ' ').split(' '):
+            word_parts[word].append(part)
+            parts.append(part)
+    
+    counts = {}
+    for part in parts:
+        counts[part] = 0
         
     stemmer = PorterStemmer()
     reqs = requests.get(url_prefix + title)
@@ -18,8 +29,20 @@ def count_words(title, words):
     text = re.sub("[^a-zA-Z']+", " ", text)
     
     for word in text.split(' '):
-        word = stemmer.stem(word)
-        if word in words:
+        word = word.lower()
+        if word in parts:
             counts[word] += 1
-            
-    return counts
+            continue
+        word = stemmer.stem(word)
+        if word in parts:
+            counts[word] += 1
+    
+    word_counts = {}
+    for word in word_parts:
+        total = 0
+        for part in word_parts[word]:
+            total += counts[part]
+        total /= len(word_parts[word])
+        word_counts[word] = total
+
+    return word_counts
