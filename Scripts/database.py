@@ -13,6 +13,8 @@ ignore_ids = [
     35566739, # Integrated Authority File
     422994, # Digital object identifier
     9898086, # Mint (newspaper)
+    48455863, # Semantic Scholar
+    503009, #PubMed
     #12418604, # Mount Olympus
     #148363 # Ancient_Greek
 ]
@@ -21,6 +23,16 @@ def title_to_id(title):
     cur.execute("SELECT id FROM pages WHERE title='{0}';".format(title))
     row = cur.fetchone()
     return int(row[0])
+
+
+def get_ids(page_titles):
+    title_to_id = {}
+    page_titles = str(tuple(page_titles)).replace(',)', ')')
+    cur.execute("SELECT id, title FROM pages WHERE title IN {0};".format(page_titles))
+    rows = cur.fetchall()
+    for row in rows:
+        title_to_id[row[1]] = row[0]
+    return title_to_id
 
 
 def get_titles(page_ids):
@@ -57,4 +69,11 @@ def fetch_all_links(page_ids):
                 page_links[page_id].add(link_id)
                 directions.add((link_id, page_id))
     return page_links, directions
-    
+
+
+def fetch_all_links_flat(page_ids):
+    links, directions = fetch_all_links(page_ids)
+    link_ids = set()
+    for key in links:
+        link_ids.update(links[key])
+    return link_ids

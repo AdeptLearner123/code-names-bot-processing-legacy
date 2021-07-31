@@ -38,7 +38,7 @@ def get_link_scores(from_id, to_id):
     max_score = 0
     combined_scores = []
     for page_id in page_ids:
-        title = id_to_title[page_id]
+        title = id_to_title[page_id] if page_id in id_to_title else "Unknown"
         to_score = to_scores[page_id]
         from_score = from_scores[page_id]
         score = to_score * from_score

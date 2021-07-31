@@ -106,7 +106,8 @@ def print_paths(from_title, to_title):
         path_str = ''
         for i in range(len(path)):
             page_id = path[i]
-            path_str += id_to_title[page_id]
+            title = id_to_title[page_id] if page_id in id_to_title else "Unknown"
+            path_str += title
             if i < len(path) - 1:
                 next_id = path[i + 1]
                 outgoing = (page_id, next_id) in directions
