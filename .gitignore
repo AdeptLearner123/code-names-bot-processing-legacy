@@ -1,5 +1,9 @@
-sdow.sqlite
+wiki.sqlite
+term_counts.sqlite
 Notebooks/
+Profiling/
 .ipynb_checkpoints/
 .DS_Store
 __pycache__/
+debugging.py
+term_counts/

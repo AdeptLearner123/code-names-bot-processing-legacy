@@ -1,6 +1,6 @@
 import sqlite3
 
-con = sqlite3.connect('sdow.sqlite')
+con = sqlite3.connect('wiki.sqlite')
 cur = con.cursor()
 
 # Ignore common articles that appear as references
@@ -15,8 +15,6 @@ ignore_ids = [
     9898086, # Mint (newspaper)
     48455863, # Semantic Scholar
     503009, #PubMed
-    #12418604, # Mount Olympus
-    #148363 # Ancient_Greek
 ]
 
 def title_to_id(title):
@@ -25,7 +23,33 @@ def title_to_id(title):
     return int(row[0])
 
 
-def get_ids(page_titles):
+def id_to_title(page_id):
+    cur.execute("SELECT title FROM pages WHERE id='{0}';".format(page_id))
+    row = cur.fetchone()
+    return int(row[0])
+
+
+def get_titles_set(page_ids):
+    titles = set()
+    page_ids = str(tuple(page_ids)).replace(',)', ')')
+    cur.execute("SELECT title FROM pages WHERE id IN {0};".format(page_ids))
+    rows = cur.fetchall()
+    for row in rows:
+        titles.add(row[0])
+    return titles
+
+
+def get_ids_set(page_titles):
+    ids = set()
+    page_titles = str(tuple(page_titles)).replace(',)', ')')
+    cur.execute("SELECT id FROM pages WHERE title IN {0};".format(page_titles))
+    rows = cur.fetchall()
+    for row in rows:
+        ids.add(row[0])
+    return ids
+
+
+def get_ids_dict(page_titles):
     title_to_id = {}
     page_titles = str(tuple(page_titles)).replace(',)', ')')
     cur.execute("SELECT id, title FROM pages WHERE title IN {0};".format(page_titles))
@@ -33,17 +57,6 @@ def get_ids(page_titles):
     for row in rows:
         title_to_id[row[1]] = row[0]
     return title_to_id
-
-
-def get_titles(page_ids):
-    # Returns a map of page_id -> page_title
-    id_to_title = {}
-    page_ids = str(tuple(page_ids)).replace(',)', ')')
-    cur.execute("SELECT id, title FROM pages WHERE id IN {0};".format(page_ids))
-    rows = cur.fetchall()
-    for row in rows:
-        id_to_title[row[0]] = row[1]
-    return id_to_title
 
 
 def fetch_all_links(page_ids):
@@ -71,9 +84,15 @@ def fetch_all_links(page_ids):
     return page_links, directions
 
 
-def fetch_all_links_flat(page_ids):
-    links, directions = fetch_all_links(page_ids)
+def fetch_links_set(page_ids):
+    page_ids = str(tuple(page_ids)).replace(',)', ')')
+    cur.execute("SELECT outgoing_links, incoming_links FROM links WHERE id IN {0};".format(page_ids))
     link_ids = set()
-    for key in links:
-        link_ids.update(links[key])
+    for row in cur.fetchall():
+        for link_id in row[0].split('|'):
+            if link_id:
+                link_ids.add(int(link_id))
+        for link_id in row[1].split('|'):
+            if link_id:
+                link_ids.add(int(link_id))
     return link_ids
