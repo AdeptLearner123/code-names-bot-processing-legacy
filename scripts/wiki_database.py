@@ -26,7 +26,7 @@ def title_to_id(title):
 def id_to_title(page_id):
     cur.execute("SELECT title FROM pages WHERE id='{0}';".format(page_id))
     row = cur.fetchone()
-    return int(row[0])
+    return row[0]
 
 
 def get_titles_set(page_ids):
@@ -49,6 +49,16 @@ def get_ids_set(page_titles):
     return ids
 
 
+def get_titles_dict(page_ids):
+    id_to_title = {}
+    page_ids = str(tuple(page_ids)).replace(',)', ')')
+    cur.execute("SELECT id, title FROM pages WHERE id IN {0};".format(page_ids))
+    rows = cur.fetchall()
+    for row in rows:
+        id_to_title[row[0]] = row[1]
+    return id_to_title
+
+
 def get_ids_dict(page_titles):
     title_to_id = {}
     page_titles = str(tuple(page_titles)).replace(',)', ')')
@@ -60,7 +70,6 @@ def get_ids_dict(page_titles):
 
 
 def fetch_all_links(page_ids):
-    # Returns map (page_id -> list of page_ids)
     directions = set()
     page_ids = str(tuple(page_ids)).replace(',)', ')')
     cur.execute("SELECT id, outgoing_links, incoming_links FROM links WHERE id IN {0};".format(page_ids))
@@ -84,15 +93,33 @@ def fetch_all_links(page_ids):
     return page_links, directions
 
 
-def fetch_links_set(page_ids):
+def fetch_all_links_set(page_ids):
+    return fetch_links_set(page_ids, True, True)
+
+
+def fetch_incoming_links_set(page_ids):
+    return fetch_links_set(page_ids, False, True)
+
+
+def fetch_outgoing_links_set(page_ids):
+    return fetch_links_set(page_ids, True, False)
+
+
+def fetch_links_set(page_ids, outgoing, incoming):
+    if outgoing and incoming:
+        field_str = 'outgoing_links, incoming_links'
+    elif outgoing:
+        field_str = 'outgoing_links'
+    elif incoming:
+        field_str = 'incoming_links'
+
     page_ids = str(tuple(page_ids)).replace(',)', ')')
-    cur.execute("SELECT outgoing_links, incoming_links FROM links WHERE id IN {0};".format(page_ids))
+    cur.execute("SELECT {0} FROM links WHERE id IN {1};".format(field_str, page_ids))
+
     link_ids = set()
     for row in cur.fetchall():
-        for link_id in row[0].split('|'):
-            if link_id:
-                link_ids.add(int(link_id))
-        for link_id in row[1].split('|'):
-            if link_id:
-                link_ids.add(int(link_id))
+        for field in row:
+            for link_id in field.split('|'):
+                if link_id:
+                    link_ids.add(int(link_id))
     return link_ids

@@ -1,12 +1,12 @@
-black = ["CROWN"]
-blank = ["LINK","TOKYO","RACKET","ROCK","PANTS","MOON","MAMMOTH"]
-blue = ["SHADOW","PIN","NINJA","POUND","ORGAN","PART","SNOW","SPY"]
-red = ["PIANO","NOVEL","PAPER","BUCK","EUROPE","TRUNK","STATE","BED","TABLE"]
+BLACK = ["CROWN"]
+BLANK = ["LINK","TOKYO","RACKET","ROCK","PANTS","MOON","MAMMOTH"]
+BLUE = ["SHADOW","PIN","NINJA","POUND","ORGAN","PART","SNOW","SPY"]
+RED = ["PIANO","NOVEL","PAPER","BUCK","EUROPE","TRUNK","STATE","BED","TABLE"]
 
 def get_all_terms():
     terms = []
-    terms.extend(black)
-    terms.extend(blank)
-    terms.extend(blue)
-    terms.extend(red)
+    terms.extend(BLACK)
+    terms.extend(BLANK)
+    terms.extend(BLUE)
+    terms.extend(RED)
     return terms

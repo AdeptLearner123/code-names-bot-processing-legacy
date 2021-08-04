@@ -1,10 +1,11 @@
-import requests
-from bs4 import BeautifulSoup
 import re
 from nltk.stem.porter import *
 from urllib.request import urlopen
 from urllib import parse
 import json
+from bs4 import BeautifulSoup
+from utils import extract_clue_word
+import unidecode
 
 #URL_PREFIX = 'https://en.wikipedia.org/wiki/'
 URL_PREFIX = 'https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles='
@@ -62,15 +63,6 @@ def init_word_counts(target_terms):
     return term_words, word_counts
 
 
-"""
-def download_text(page_title):
-    reqs = requests.get(URL_PREFIX + page_title)
-    soup = BeautifulSoup(reqs.text, 'html.parser')
-    body = soup.find('div', {'id': 'bodyContent'})
-    return body.text
-"""
-
-
 def download_text(page_title):
     url = URL_PREFIX + parse.quote_plus(page_title)
 
@@ -92,5 +84,39 @@ def download_text(page_title):
 
 def format_text(text):
     text = text.lower()
+    text = unidecode.unidecode(text)
     text = re.sub("[^a-zA-Z']+", " ", text)
     return text
+
+
+def get_excerpt(page_title, term):
+    text = download_text(page_title)
+    return extract_excerpt(page_title, text, term)
+
+
+def extract_excerpt(title, html, term):
+    clue = extract_clue_word(title, [])
+    print("Clue: " + clue.lower())
+    soup = BeautifulSoup(html)
+    text = soup.get_text()
+    sentences = text.replace('\n', '. ').split('. ')
+    half_excerpts = []
+    for sentence in sentences:
+        sentence_words = format_text(sentence)
+        term_words, word_counts = init_word_counts([term, clue])
+        count_words(word_counts, sentence_words)
+        term_counts = agg_term_counts(term_words, word_counts)
+        #print("Sentence: " + sentence)
+        #print("Term counts: " + str(term_counts[term.lower()]) + " " + str(term_counts[clue.lower()]))
+        if term_counts[term.lower()] >= 1:
+            if term_counts[clue.lower()] >= 1:
+                return sentence
+            half_excerpts.append(sentence)
+    
+    if len(half_excerpts) > 0:
+        return half_excerpts[0]
+    return ""
+
+
+#Sentence 8 should be the excerpt
+print("Excerpt: " + get_excerpt('Cashew', 'Apple'))
