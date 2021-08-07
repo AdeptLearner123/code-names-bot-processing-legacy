@@ -54,6 +54,6 @@ def get_file_name(term):
     return "csv_output/" + term + ".csv"
 
 
-output_counts("TOKYO")
-#for term in sample_board.get_all_terms():
-#    output_counts(term)
+for term in sample_board.get_all_terms():
+    print("Term: " + term + " " + str(len(get_link_ids(term))))
+    #output_counts(term)

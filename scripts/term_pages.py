@@ -14,7 +14,7 @@ TERM_PAGES = {
     "ORGAN": ["Organ_(biology)", "Organ_(music)"],
     "PART": ["Part_(music)", "Spare_part"],
     "SNOW": ["Snow"],
-    "SPY": ["Spy"],
+    "SPY": ["Espionage", "Spy_film"],
     "PIANO": ["Piano"],
     "NOVEL": ["Novel"],
     "PAPER": ["Paper", "Term_paper"],

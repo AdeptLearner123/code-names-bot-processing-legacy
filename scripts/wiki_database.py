@@ -18,21 +18,21 @@ ignore_ids = [
 ]
 
 def title_to_id(title):
-    cur.execute("SELECT id FROM pages WHERE title='{0}';".format(title))
+    cur.execute("SELECT id FROM pages WHERE title=?;", [title])
     row = cur.fetchone()
     return int(row[0])
 
 
 def id_to_title(page_id):
-    cur.execute("SELECT title FROM pages WHERE id='{0}';".format(page_id))
+    cur.execute("SELECT title FROM pages WHERE id=?;", [page_id])
     row = cur.fetchone()
     return row[0]
 
 
 def get_titles_set(page_ids):
     titles = set()
-    page_ids = str(tuple(page_ids)).replace(',)', ')')
-    cur.execute("SELECT title FROM pages WHERE id IN {0};".format(page_ids))
+    query = "SELECT id FROM pages WHERE title IN ({0});".format(placeholder_list(page_ids))
+    cur.execute(query, list(page_ids))
     rows = cur.fetchall()
     for row in rows:
         titles.add(row[0])
@@ -41,8 +41,8 @@ def get_titles_set(page_ids):
 
 def get_ids_set(page_titles):
     ids = set()
-    page_titles = str(tuple(page_titles)).replace(',)', ')')
-    cur.execute("SELECT id FROM pages WHERE title IN {0};".format(page_titles))
+    query = "SELECT id FROM pages WHERE title IN ({0});".format(placeholder_list(page_titles))
+    cur.execute(query, list(page_titles))
     rows = cur.fetchall()
     for row in rows:
         ids.add(row[0])
@@ -51,8 +51,8 @@ def get_ids_set(page_titles):
 
 def get_titles_dict(page_ids):
     id_to_title = {}
-    page_ids = str(tuple(page_ids)).replace(',)', ')')
-    cur.execute("SELECT id, title FROM pages WHERE id IN {0};".format(page_ids))
+    query = "SELECT id, title FROM pages WHERE id IN ({0});".format(placeholder_list(page_ids))
+    cur.execute(query, list(page_ids))
     rows = cur.fetchall()
     for row in rows:
         id_to_title[row[0]] = row[1]
@@ -61,8 +61,8 @@ def get_titles_dict(page_ids):
 
 def get_ids_dict(page_titles):
     title_to_id = {}
-    page_titles = str(tuple(page_titles)).replace(',)', ')')
-    cur.execute("SELECT id, title FROM pages WHERE title IN {0};".format(page_titles))
+    query = "SELECT id, title FROM pages WHERE title IN ({0});".format(placeholder_list(page_titles))
+    cur.execute(query, list(page_titles))
     rows = cur.fetchall()
     for row in rows:
         title_to_id[row[1]] = row[0]
@@ -71,8 +71,8 @@ def get_ids_dict(page_titles):
 
 def fetch_all_links(page_ids):
     directions = set()
-    page_ids = str(tuple(page_ids)).replace(',)', ')')
-    cur.execute("SELECT id, outgoing_links, incoming_links FROM links WHERE id IN {0};".format(page_ids))
+    query = "SELECT id, outgoing_links, incoming_links FROM links WHERE id IN ({0});".format(placeholder_list(page_ids))
+    cur.execute(query, list(page_ids))
     page_links = {}
     for row in cur.fetchall():
         page_id = row[0]
@@ -113,8 +113,8 @@ def fetch_links_set(page_ids, outgoing, incoming):
     elif incoming:
         field_str = 'incoming_links'
 
-    page_ids = str(tuple(page_ids)).replace(',)', ')')
-    cur.execute("SELECT {0} FROM links WHERE id IN {1};".format(field_str, page_ids))
+    query = "SELECT {0} FROM links WHERE id IN ({1});".format(field_str, placeholder_list(page_ids))
+    cur.execute(query, list(page_ids))
 
     link_ids = set()
     for row in cur.fetchall():
@@ -123,3 +123,7 @@ def fetch_links_set(page_ids, outgoing, incoming):
                 if link_id:
                     link_ids.add(int(link_id))
     return link_ids
+
+
+def placeholder_list(list):
+    return ', '.join('?' for i in list)
