@@ -27,7 +27,7 @@ def insert_term_page(term, title, count, excerpt):
     if len(cur.fetchall()) == 0:
         cur.execute("INSERT INTO term_page (term, title, count, excerpt) VALUES(?,?,?,?);", [term, title, count, excerpt])
     else:
-        cur.execute("UPDATE term_page SET count=?, excerpt=? WHERE term=? AND title=?;", [term, title, count, excerpt])
+        cur.execute("UPDATE term_page SET count=?, excerpt=? WHERE term=? AND title=?;", [count, excerpt, term, title])
     con.commit()
 
 
@@ -51,10 +51,19 @@ def count_term_entries(term):
     return cur.fetchone()[0]
 
 
-def sample_term_entries(term, count):
+def sample_term_pages(term, count):
     query = "SELECT * FROM term_page WHERE term=? LIMIT ?"
     cur.execute(query, [term, count])
     return cur.fetchall()
+
+
+def get_term_page_counts(term):
+    query = "SELECT title, count FROM term_page WHERE term=?"
+    cur.execute(query, [term])
+    counts = {}
+    for row in cur.fetchall():
+        counts[row[0]] = row[1]
+    return counts
 
 
 def count_all_entries():
@@ -72,3 +81,13 @@ def sample_all_entries(count):
 def count_empties():
     cur.execute("SELECT COUNT() FROM term_page WHERE excerpt IS NULL OR excerpt=''")
     return cur.fetchone()[0]
+
+
+def get_terms():
+    cur.execute("SELECT DISTINCT term FROM term_page")
+    return list(map(lambda row:row[0], cur.fetchall()))
+
+
+def get_entry(term, title):
+    cur.execute("SELECT count, excerpt FROM term_page WHERE term=? AND title=?", [term, title])
+    return cur.fetchone()

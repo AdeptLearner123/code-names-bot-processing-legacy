@@ -1,4 +1,5 @@
 import sqlite3
+import progressbar
 
 con = sqlite3.connect('wiki.sqlite')
 cur = con.cursor()
@@ -56,6 +57,20 @@ def get_titles_dict(page_ids):
     rows = cur.fetchall()
     for row in rows:
         id_to_title[row[0]] = row[1]
+    return id_to_title
+
+
+def get_all_titles_dict():
+    id_to_title = {}
+    cur.execute("SELECT id, title FROM pages;")
+    rows = cur.fetchall()
+    bar = progressbar.ProgressBar(maxval=len(rows), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar.start()
+    for i in range(len(rows)):
+        bar.update(i)
+        row = rows[i]
+        id_to_title[row[0]] = row[1]
+    bar.finish()
     return id_to_title
 
 

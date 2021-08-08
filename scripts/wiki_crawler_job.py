@@ -1,7 +1,7 @@
 from term_pages import TERM_PAGES
 import wiki_database
 import progressbar
-import output_database
+import term_page_database
 import wiki_crawler
 import time
 
@@ -49,7 +49,7 @@ def process_term(term, page_terms, term_pages, term_double_pages):
     filtered_pages = set(filter(lambda page:len(page_terms[page]) >= 2, pages))
     double_pages = term_double_pages[term]
     target_pages = filtered_pages.union(double_pages)
-    filtered_target_pages = output_database.get_missing_pages(term, target_pages)
+    filtered_target_pages = term_page_database.get_missing_pages(term, target_pages)
     
     print("Processing {0}  Links: {1}  Filtered Links: {2}  Double Links: {3}  Target Links: {4}  Filtered Target Links: {5}"\
         .format(term, len(pages), len(filtered_pages), len(double_pages), len(target_pages), len(filtered_target_pages)))
@@ -65,7 +65,7 @@ def process_term(term, page_terms, term_pages, term_double_pages):
             continue
 
         for term in term_counts:
-            output_database.insert_term_page(term, page, term_counts[term], excerpts[term])
+            term_page_database.insert_term_page(term, page, term_counts[term], excerpts[term])
         i += 1
         bar.update(i)
     bar.finish()

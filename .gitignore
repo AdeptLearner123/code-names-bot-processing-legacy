@@ -7,3 +7,7 @@ Profiling/
 __pycache__/
 debugging.py
 term_counts/
+csv_output/
+*.zip
+*.sqlite
+runtimes.txt
