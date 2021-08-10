@@ -16,6 +16,7 @@ ignore_ids = [
     9898086, # Mint (newspaper)
     48455863, # Semantic Scholar
     503009, #PubMed
+    253375, #HarperCollins
 ]
 
 def title_to_id(title):
@@ -32,7 +33,7 @@ def id_to_title(page_id):
 
 def get_titles_set(page_ids):
     titles = set()
-    query = "SELECT id FROM pages WHERE title IN ({0});".format(placeholder_list(page_ids))
+    query = "SELECT title FROM pages WHERE id IN ({0});".format(placeholder_list(page_ids))
     cur.execute(query, list(page_ids))
     rows = cur.fetchall()
     for row in rows:
@@ -135,7 +136,7 @@ def fetch_links_set(page_ids, outgoing, incoming):
     for row in cur.fetchall():
         for field in row:
             for link_id in field.split('|'):
-                if link_id:
+                if link_id and int(link_id) not in ignore_ids:
                     link_ids.add(int(link_id))
     return link_ids
 

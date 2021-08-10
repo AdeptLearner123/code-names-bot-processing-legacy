@@ -6,10 +6,11 @@ from utils import count_title_words
 import scores_database
 import progressbar
 import time
+import citation_pages
 
 def get_link_strength_and_str(directions, id_1, id_2):
-    incoming = (id_1, id_2) in directions
-    outgoing = (id_2, id_1) in directions
+    outgoing = (id_1, id_2) in directions
+    incoming = (id_2, id_1) in directions
     if incoming and outgoing:
         return 2, '<->'
     elif incoming:
@@ -37,6 +38,8 @@ def output_scores(term, id_to_title):
     page_counts = term_page_database.get_term_page_counts(term)
 
     source_links, directions_1 = wiki_database.fetch_all_links(source_ids)
+    incoming_links = wiki_database.fetch_incoming_links_set(source_ids)
+    citations = citation_pages.get_term_citations(term)
     link_1_ids = set()
 
     link_1_count = count_links_dict(source_links)
@@ -51,6 +54,9 @@ def output_scores(term, id_to_title):
             if link_1_id not in id_to_title:
                 continue
             link_1_title = id_to_title[link_1_id]
+            # If the only connection between term and page is a citation
+            if link_1_id not in incoming_links and link_1_title in citations:
+                continue
             link_1_clue = extract_clue_word(link_1_title, term)
             if link_1_clue is None:
                 continue

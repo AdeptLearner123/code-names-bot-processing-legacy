@@ -10,10 +10,17 @@ def sample_terms(size):
     all_terms = all_terms.difference(set(s))
     return s
 
-blue = sample_terms(8)
-red = sample_terms(9)
-black = sample_terms(1)
-blank = sample_terms(7)
+#blue = sample_terms(8)
+#red = sample_terms(9)
+#black = sample_terms(1)
+#blank = sample_terms(7)
+#blue = ["BED", "APPLE", "DINOSAUR", "STATE", "AMAZON", "ANTARCTICA", "LION", "MOON"]
+blue = ["ANTARCTICA", "STATE"]
+red = ["PART", "SNOW", "EUROPE", "AGENT", "NINJA", "BUCK", "ARM", "CENTER", "TRUNK"]
+black = ["PANTS"]
+blank = ["ANGEL", "POUND", "PIANO", "PIN", "ALPS", "MAMMOTH", "OCTOPUS"]
+
+given_clues = []
 
 def print_board():
     print("BLUE: {0}".format('   '.join(list(blue))))
@@ -23,7 +30,9 @@ def print_board():
 
 
 def print_clue():
-    clue = clue_generator.best_clue(blue, red + black + blank, 1)[0]
+    clue = clue_generator.best_clue(blue, red + black + blank, 1, given_clues)[0]
+    given_clues.append(clue[0])
+    print("Given clues: " + str(given_clues))
     print("CLUE: {0} ({1})   {2}".format(clue[0], clue[2], clue[1]))
 
 
@@ -34,10 +43,14 @@ def guess():
         val = int(val)
         if val == 1:
             clue = input("Clue: ")
-            blue.remove(clue)
-            red.remove(clue)
-            black.remove(clue)
-            blank.remove(clue)
+            if clue in blue:
+                blue.remove(clue)
+            elif clue in red: 
+                red.remove(clue)
+            elif clue in black:
+                black.remove(clue)
+            elif clue in blank:
+                blank.remove(clue)
             print_board()
         elif val == 2:
             clue = input("Clue: ")

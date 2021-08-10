@@ -104,7 +104,7 @@ def download_text(page_title):
         print('socket timed out - URL %s', url)
         return None
     except:
-        print("Failed to download text: " + page_title + " " + url + " " + str(data_json))
+        print("Failed to download text: " + page_title + " " + url)
         print("Unexpected error:", sys.exc_info()[0])
         return None
 

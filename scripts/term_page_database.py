@@ -91,3 +91,8 @@ def get_terms():
 def get_entry(term, title):
     cur.execute("SELECT count, excerpt FROM term_page WHERE term=? AND title=?", [term, title])
     return cur.fetchone()
+
+
+def delete_entry(term, title):
+    cur.execute("DELETE FROM term_page WHERE term=? AND title=?", [term, title])
+    con.commit()

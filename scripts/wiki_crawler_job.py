@@ -4,6 +4,11 @@ import progressbar
 import term_page_database
 import wiki_crawler
 import time
+import citation_pages
+import citations_database
+import citation_pages_job
+
+crawled_pages = 0
 
 def get_page_terms():
     page_terms = {}
@@ -45,20 +50,24 @@ def get_page_terms():
 
 
 def process_term(term, page_terms, term_pages, term_double_pages):
+    global crawled_pages
+
     pages = term_pages[term]
     filtered_pages = set(filter(lambda page:len(page_terms[page]) >= 2, pages))
+    filtered_pages_citations = filtered_pages.difference(citation_pages.get_term_citations(term))
     double_pages = term_double_pages[term]
-    target_pages = filtered_pages.union(double_pages)
+    target_pages = filtered_pages_citations.union(double_pages)
     filtered_target_pages = term_page_database.get_missing_pages(term, target_pages)
     
-    print("Processing {0}  Links: {1}  Filtered Links: {2}  Double Links: {3}  Target Links: {4}  Filtered Target Links: {5}"\
-        .format(term, len(pages), len(filtered_pages), len(double_pages), len(target_pages), len(filtered_target_pages)))
-
+    print("Processing {0}  Links: {1}  Filtered Links: {2}  Filtered Links Citations: {3} Double Links: {4}  Target Links: {5}  Filtered Target Links: {6}"\
+        .format(term, len(pages), len(filtered_pages), len(filtered_pages_citations), len(double_pages), len(target_pages), len(filtered_target_pages)))
+    
     count = len(filtered_target_pages)
     bar = progressbar.ProgressBar(maxval=count, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
     i = 0
     for page in filtered_target_pages:
+        crawled_pages += 1
         term_counts, excerpts = wiki_crawler.count_terms_multi(page, page_terms[page])
         if term_counts is None:
             print("Skipping")
@@ -72,6 +81,7 @@ def process_term(term, page_terms, term_pages, term_double_pages):
 
 
 def job_all():
+    verify_citations()
     job(TERM_PAGES.keys())
 
 
@@ -81,6 +91,20 @@ def job(terms):
         process_term(term, page_terms, term_pages, term_double_pages)
 
 
+def verify_citations():
+    print("Verifying citations")
+    citation_ids = citations_database.get_page_ids()
+    source_titles = []
+    for term in TERM_PAGES:
+        source_titles.extend(TERM_PAGES[term])
+    source_ids = wiki_database.get_ids_set(source_titles)
+    remaining_ids = source_ids.difference(citation_ids)
+    if len(remaining_ids) > 0:
+        print("Not all source pages have been analyzed for citations")
+        citation_pages_job.save_all_references()
+
+
 start_time = time.time()
 job_all()
 print("--- %s seconds ---" % (time.time() - start_time))
+print("--- %s pages ---" % (crawled_pages))

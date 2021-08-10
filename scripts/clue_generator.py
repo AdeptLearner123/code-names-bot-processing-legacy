@@ -4,17 +4,18 @@ from utils import extract_clue_word
 
 NEGATIVE_THRESHOLD = 2.0
 
-def best_clue(pos_terms, neg_terms, count):
+def best_clue(pos_terms, neg_terms, count, ignore=[]):
     term_scores = get_term_scores(pos_terms, neg_terms)
     neg_scores = get_neg_scores(neg_terms, term_scores)
     clue_scores, clue_counts = get_clue_scores(pos_terms, neg_scores, term_scores)
-    return get_best_clues(clue_scores, clue_counts, count)
+    return get_best_clues(clue_scores, clue_counts, count, ignore)
 
 
-def get_best_clues(clue_scores, clue_counts, count):
+def get_best_clues(clue_scores, clue_counts, count, ignore=[]):
     clue_scores_list = []
     for clue in clue_scores:
-        clue_scores_list.append((clue, clue_scores[clue], clue_counts[clue]))
+        if clue not in ignore:
+            clue_scores_list.append((clue, clue_scores[clue], clue_counts[clue]))
     clue_scores_list.sort(key=lambda tup:tup[1], reverse=True)
 
     return clue_scores_list[:count]
