@@ -17,3 +17,13 @@ def extract_clue_word(clue_title, term):
 def count_title_words(clue_title):
     clue_title = trim_suffix(clue_title)
     return clue_title.count('_') + 1
+
+
+def extract_title_words(title):
+    title = trim_suffix(title)
+    title_words = title.split('_')
+    cleaned_title_words = []
+    for word in title_words:
+        alphanumeric = [c for c in word if c.isalnum()]
+        cleaned_title_words.append("".join(alphanumeric))
+    return cleaned_title_words
