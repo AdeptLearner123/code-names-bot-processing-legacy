@@ -39,7 +39,7 @@ TERM_PAGES = {
     "BOLT": ["Bolt_(fastener)", "Bolt_(firearms)", "Bolt_(climbing)", "Usain_Bolt"],
     "BOMB": ["Bomb"],
     "BOND": ["Bond_(finance)", "Bail", "Chemical_bond", "James_Bond_(literary_character)"],
-    "BOOM": ["Sonic_boom", "Baby_boom"],
+    "BOOM": ["Sonic_boom", "Baby_boom", "Explosion"],
     "BOOT": ["Boot"],
     "BOTTLE": ["Bottle"],
     "BOW": ["Bow_and_arrow", "Bowing"],

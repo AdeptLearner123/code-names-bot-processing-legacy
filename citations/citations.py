@@ -1,6 +1,6 @@
-import wiki_database
-import citations_database
-from term_pages import TERM_PAGES
+from utils import wiki_database
+from citations import citations_database
+from utils.term_pages import TERM_PAGES
 
 def get_page_citations(title):
     page_id = wiki_database.title_to_id(title)

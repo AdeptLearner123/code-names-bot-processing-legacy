@@ -1,6 +1,6 @@
 import sqlite3
 
-con = sqlite3.connect('scores.sqlite')
+con = sqlite3.connect('scores/scores.sqlite')
 cur = con.cursor()
 
 def setup():
@@ -56,3 +56,17 @@ def get_scores(term):
 def get_term_clue(term, clue):
     cur.execute("SELECT score, path FROM term_clue WHERE term=? AND clue=?", [term, clue])
     return cur.fetchone()
+
+
+def clear_term_clues(term):
+    cur.execute("DELETE FROM term_clue WHERE term=?", [term])
+    con.commit()
+    cur.execute("VACUUM")
+    con.commit()
+
+
+def clear():
+    cur.execute("DELETE FROM term_clue")
+    con.commit()
+    cur.execute("VACUUM")
+    con.commit()

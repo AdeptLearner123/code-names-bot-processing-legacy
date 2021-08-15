@@ -1,7 +1,7 @@
 import sqlite3
 import progressbar
 
-con = sqlite3.connect('wiki.sqlite')
+con = sqlite3.connect('utils/wiki.sqlite')
 cur = con.cursor()
 
 # Ignore common articles that appear as references
@@ -18,6 +18,26 @@ ignore_ids = [
     503009, #PubMed
     253375, #HarperCollins
 ]
+
+
+def setup():
+    cur.execute(
+        """
+            CREATE INDEX IF NOT EXISTS link_id_index ON links (id);
+        """
+    )
+
+
+def get_indexes():
+    cur.execute(
+        """
+            SELECT name 
+            FROM sqlite_master 
+            WHERE type = 'index';
+        """
+    )
+    return cur.fetchall()
+
 
 def title_to_id(title):
     cur.execute("SELECT id FROM pages WHERE title=?;", [title])
@@ -87,26 +107,38 @@ def get_ids_dict(page_titles):
 
 def fetch_all_links(page_ids):
     directions = set()
+    ignore_ids_set = set(ignore_ids)
     query = "SELECT id, outgoing_links, incoming_links FROM links WHERE id IN ({0});".format(placeholder_list(page_ids))
     cur.execute(query, list(page_ids))
     page_links = {}
     for row in cur.fetchall():
-        page_id = row[0]
-        outgoing_links_str = row[1]
-        incoming_links_str = row[2]
+        page_id, outgoing_links_str, incoming_links_str = row
         page_links[page_id] = set()
 
         for link_id in outgoing_links_str.split('|'):
-            if link_id and int(link_id) not in ignore_ids:
+            if link_id and int(link_id) not in ignore_ids_set:
                 link_id = int(link_id)
                 page_links[page_id].add(link_id)
                 directions.add((page_id, link_id))
         for link_id in incoming_links_str.split('|'):
-            if link_id and int(link_id) not in ignore_ids:
+            if link_id and int(link_id) not in ignore_ids_set:
                 link_id = int(link_id)
                 page_links[page_id].add(link_id)
                 directions.add((link_id, page_id))
     return page_links, directions
+
+
+def fetch_double_links(page_ids):
+    query = "SELECT id, outgoing_links, incoming_links FROM links WHERE id IN ({0});".format(placeholder_list(page_ids))
+    cur.execute(query, list(page_ids))
+    page_links = {}
+    for row in cur.fetchall():
+        page_id, outgoing_links_str, incoming_links_str = row
+
+        outgoing_links = set(filter(lambda id: id and int(id) not in ignore_ids, outgoing_links_str.split('|')))
+        incoming_links = set(filter(lambda id: id and int(id) not in ignore_ids, incoming_links_str.split('|')))
+        page_links[page_id] = outgoing_links.intersection(incoming_links)
+    return page_links
 
 
 def fetch_all_links_set(page_ids):
@@ -141,5 +173,42 @@ def fetch_links_set(page_ids, outgoing, incoming):
     return link_ids
 
 
+def get_redirect(id):
+    cur.execute("SELECT target_id FROM redirects WHERE source_id=?", [id])
+    row = cur.fetchone()
+    if row is None:
+        return None
+    return row[0]
+
+
+def get_redirected_id(id):
+    redirect_id = get_redirect(id)
+    if redirect_id is None:
+        return id
+    return redirect_id
+
+
+def get_redirected_ids(ids):
+    return set(map(lambda id:get_redirected_id(id), ids))
+
+
+def get_redirected_title(title):
+    id = title_to_id(title)
+    redirect_id = get_redirect(id)
+    if redirect_id is None:
+        return title
+    return id_to_title(redirect_id)
+
+
+def get_title_ids(title):
+    cur.execute("SELECT id FROM pages WHERE title=?", [title])
+    return list(map(lambda x:x[0], cur.fetchall()))
+
+
 def placeholder_list(list):
     return ', '.join('?' for i in list)
+
+
+def get_links_row(id):
+    cur.execute("SELECT * FROM links WHERE id=?", [id])
+    return cur.fetchone()

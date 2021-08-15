@@ -1,21 +1,19 @@
-import scores_database
-import wiki_database
-from utils import extract_clue_word
+from scores import scores_database
 
 NEGATIVE_THRESHOLD = 2.0
 
 def best_clue(pos_terms, neg_terms, count, ignore=[]):
     term_scores = get_term_scores(pos_terms, neg_terms)
     neg_scores = get_neg_scores(neg_terms, term_scores)
-    clue_scores, clue_counts = get_clue_scores(pos_terms, neg_scores, term_scores)
-    return get_best_clues(clue_scores, clue_counts, count, ignore)
+    clue_scores, clue_counts, clue_terms = get_clue_scores(pos_terms, neg_scores, term_scores)
+    return get_best_clues(clue_scores, clue_counts, clue_terms, count, ignore)
 
 
-def get_best_clues(clue_scores, clue_counts, count, ignore=[]):
+def get_best_clues(clue_scores, clue_counts, clue_terms, count, ignore=[]):
     clue_scores_list = []
     for clue in clue_scores:
         if clue not in ignore:
-            clue_scores_list.append((clue, clue_scores[clue], clue_counts[clue]))
+            clue_scores_list.append((clue, clue_scores[clue], clue_counts[clue], clue_terms[clue]))
     clue_scores_list.sort(key=lambda tup:tup[1], reverse=True)
 
     return clue_scores_list[:count]
@@ -31,6 +29,7 @@ def get_term_scores(pos_terms, neg_terms):
 def get_clue_scores(pos_terms, neg_scores, term_scores):
     clue_scores = {}
     clue_counts = {}
+    clue_terms = {}
     for term in pos_terms:
         scores = term_scores[term]
         for clue_option in scores:
@@ -39,9 +38,11 @@ def get_clue_scores(pos_terms, neg_scores, term_scores):
             if clue_option not in clue_scores:
                 clue_scores[clue_option] = 0
                 clue_counts[clue_option] = 0
+                clue_terms[clue_option] = []
             clue_scores[clue_option] += scores[clue_option]
             clue_counts[clue_option] += 1
-    return clue_scores, clue_counts
+            clue_terms[clue_option].append(term)
+    return clue_scores, clue_counts, clue_terms
 
 
 def get_neg_scores(neg_terms, term_scores):

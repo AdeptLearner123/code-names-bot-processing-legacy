@@ -1,6 +1,6 @@
 import sqlite3
 
-con = sqlite3.connect('citations.sqlite')
+con = sqlite3.connect('citations/citations.sqlite')
 cur = con.cursor()
 
 

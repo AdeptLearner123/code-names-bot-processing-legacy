@@ -9,6 +9,7 @@ SYNONYMS = {
     "BILL": ["INVOICE", "BEAK"],
     "BOARD": ["BLACKBOARD", "WHITEBOARD", "PLANK"],
     "BOND": ["BAIL"],
+    "BOOM": ["EXPLOSION"],
     "BUCK": ["DOLLAR", "DEER"],
     "BUFFALO": ["BUBALINA", "BISON"],
     "BUG": ["HEMIPTERA", "INSECT"],

@@ -1,9 +1,10 @@
-import wiki_database
-import citations_database
-from term_pages import TERM_PAGES
 from bs4 import BeautifulSoup
 import requests
 import progressbar
+
+from utils import wiki_database
+from citations import citations_database
+from utils.term_pages import TERM_PAGES
 
 URL_PREFIX = 'https://en.wikipedia.org/wiki/'
 PREFIX = '/wiki/'
