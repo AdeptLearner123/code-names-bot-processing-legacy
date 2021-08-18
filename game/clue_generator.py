@@ -1,4 +1,5 @@
 from scores import scores_database
+from page_extraction import page_extracts_database
 
 NEGATIVE_THRESHOLD = 2.0
 
@@ -62,7 +63,10 @@ def print_clue_term(term, clue):
     if term_clue is None:
         print("Term: {0} N/A".format(term))
     else:
-        print("Term: {0} Score: {1} Path: {2}".format(term, term_clue[0], term_clue[1]))
+        score, path = term_clue
+        end_title = path.replace('<->', '|').replace('<-', '|').replace('->', '|').split('|')[-1]
+        term_count, extract = page_extracts_database.get_extract(term, end_title)
+        print("Term: {0} Score: {1} Path: {2} Count: {3} Extract: {4}".format(term, score, path, term_count, extract))
 
 
 def explore_clue(clue, pos_terms, neg_terms):
