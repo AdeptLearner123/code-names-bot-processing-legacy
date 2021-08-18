@@ -73,14 +73,7 @@ def output_scores(term, id_to_title):
 
     for source_id in source_links:
         source_title = id_to_title[source_id_redirect_origins[source_id]]
-        source_counts = page_extracts_database.get_title_counts(source_title)
-
-        for source_word in source_counts:
-            source_score = 1 - 0.7 ** source_counts[source_word]
-            if source_word not in scores or scores[source_word] < source_score:
-                scores[source_word] = source_score
-                paths[source_word] = source_title
-
+        
         for link_1_id in source_links[source_id]:
             if link_1_id not in id_to_title:
                 continue
