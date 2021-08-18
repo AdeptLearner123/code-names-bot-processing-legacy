@@ -75,6 +75,12 @@ def output_scores(term, id_to_title):
         source_title = id_to_title[source_id_redirect_origins[source_id]]
         source_counts = page_extracts_database.get_title_counts(source_title)
 
+        for source_word in source_counts:
+            source_score = 1 - 0.7 ** source_counts[source_word]
+            if source_word not in scores or scores[source_word] < source_score:
+                scores[source_word] = source_score
+                paths[source_word] = source_title
+
         for link_1_id in source_links[source_id]:
             if link_1_id not in id_to_title:
                 continue
@@ -92,18 +98,11 @@ def output_scores(term, id_to_title):
             term_count = 0
             if link_1_title in page_counts:
                 term_count = page_counts[link_1_title]
-            source_count = 0
-            for word in link_1_words:
-                if word in source_counts:
-                    source_count += source_counts[word]
-            source_count /= len(link_1_words)
 
             link_strength, link_str = get_link_strength_and_str(directions_1, source_id, link_1_id)
             path_str = source_title + link_str + link_1_title
 
             score = 1 - 0.7 ** term_count
-            score += 1 - 0.7 ** source_count
-            score = max(0, min(1, score))
             score /= link_1_words_count
 
             for word in link_1_words:
