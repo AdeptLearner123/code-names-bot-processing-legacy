@@ -64,7 +64,7 @@ def play(seed):
         val = ''
         guesses = []
         while val != 0:
-            val = input("[0] Stop [1] Guess [2] Explain [3] Explain All:")
+            val = input("[0] Stop [1] Guess [2] Explain [3] Explain All [4] Explain All Verboes:")
             val = int(val)
             if val == 0:
                 print()
@@ -87,6 +87,9 @@ def play(seed):
             elif val == 3:
                 clue = input("Clue: ")
                 clue_generator.explore_clue(clue, starting_positive, starting_negative)
+            elif val == 4:
+                clue = input("Clue: ")
+                clue_generator.explore_clue(clue, starting_positive, starting_negative, True)
         return guesses
 
 

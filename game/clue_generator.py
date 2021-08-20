@@ -1,5 +1,6 @@
 from scores import scores_database
 from page_extraction import page_extracts_database
+from utils.term_synonyms import SYNONYMS, get_synonyms
 
 NEGATIVE_THRESHOLD = 2.0
 
@@ -58,40 +59,27 @@ def get_neg_scores(neg_terms, term_scores):
     return neg_scores
 
 
-def print_clue_term(term, clue):
+def print_clue_term(term, clue, show_extracts=False):
     term_clue = scores_database.get_term_clue(term, clue)
     if term_clue is None:
         print("Term: {0} N/A".format(term))
     else:
         score, path = term_clue
         end_title = path.replace('<->', '|').replace('<-', '|').replace('->', '|').split('|')[-1]
-        term_count, extract = page_extracts_database.get_extract(term, end_title)
-        print("Term: {0} Score: {1} Path: {2} Count: {3} Extract: {4}".format(term, score, path, term_count, extract))
+        print("Term: {0} Score: {1} Path: {2}".format(term, score, path))
+        if show_extracts:
+            for synonym in get_synonyms(term):
+                term_count, extract = page_extracts_database.get_extract(synonym, end_title)
+                print("      {0}: Count: {1}   Extract: {2}".format(synonym, term_count, extract))
 
 
-def explore_clue(clue, pos_terms, neg_terms):
+def explore_clue(clue, pos_terms, neg_terms, show_extracts=False):
     print("POSITIVE")
     for term in pos_terms:
-        print_clue_term(term, clue)
+        print_clue_term(term, clue, show_extracts)
     print("NEGATIVE")
     for term in neg_terms:
-        print_clue_term(term, clue)
-
-
-def explore_clue_generator(pos_terms, neg_terms):
-    best_clues = best_clue(pos_terms, neg_terms, 20)
-    for clue_score in best_clues:
-        print("{0}: {1} ({2})".format(clue_score[0], clue_score[1], clue_score[2]))
-    
-    val = ''
-    while val != 0:
-        val = input("[0] Quit [1] Get Term Scores:")
-        val = int(val)
-        
-        if val == 1:
-            clue = input("Clue: ")
-            explore_clue(clue, pos_terms, neg_terms)
-
+        print_clue_term(term, clue, show_extracts)
 
 #explore_clue_generator(['LION', 'OCTOPUS', 'DINOSAUR'], [])
 #explore_clue_generator(['PYRAMID', 'SQUARE', 'CENTER'], [])
