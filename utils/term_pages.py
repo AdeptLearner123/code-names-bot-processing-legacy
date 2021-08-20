@@ -2,7 +2,7 @@ TERM_PAGES = {
     "AFRICA": ["Africa"],
     "AGENT": ["Special_agent", "Law_of_agency"],
     "AIR": ["Atmosphere_of_Earth"],
-    "ALIEN": ["Alien_(law)", "Extraterrestrial_life", "Alien_(film)"],
+    "ALIEN": ["Alien_(law)", "Extraterrestrial_life"],
     "ALPS": ["Alps"],
     "AMAZON": ["Amazon_rainforest", "Amazons", "Amazon_River", "Amazon_(company)"],
     "AMBULANCE": ["Ambulance"],
@@ -25,7 +25,7 @@ TERM_PAGES = {
     "BATTERY": ["Electric_battery", "Battery_(crime)", "Battery_(tort)", "Artillery_battery"],
     "BEACH": ["Beach"],
     "BEAR": ["Bear"],
-    "BEAT": ["Strike_(attack)", "Beat_(acoustics)", "Beat_(music)"],
+    "BEAT": ["Beat_(acoustics)", "Beat_(music)"],
     "BED": ["Bed", "Bed_(geology)", "Stream_bed"],
     "BEIJING": ["Beijing"],
     "BELL": ["Bell"],
@@ -91,6 +91,6 @@ TERM_PAGES = {
     "STATE": ["State_(polity)", "State_(computer_science)"],
 
     "TOKYO": ["Tokyo"],
-    "TRUNK": ["Trunk_(car)", "Trunk_(botany)", "Torso", "Elephant"],
+    "TRUNK": ["Trunk_(car)", "Trunk_(botany)", "Torso"],
     "TABLE": ["Table_(furniture)", "Table_(database)", "Table_(information)"]
 }

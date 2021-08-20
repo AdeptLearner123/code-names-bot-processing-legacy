@@ -1,11 +1,7 @@
 SYNONYMS = {
-    "AIR": ["ATMOSPHERE"],
     "ALIEN": ["EXTRATERRESTRIAL"],
     "AMERICA": ["UNITED_STATES"],
-    "ARM": ["WEAPON"],
 
-    "BATTERY": ["ASSAULT"],
-    "BEAT": ["STRIKE"],
     "BILL": ["INVOICE", "BEAK"],
     "BOARD": ["BLACKBOARD", "WHITEBOARD", "PLANK"],
     "BOND": ["BAIL"],
@@ -13,7 +9,6 @@ SYNONYMS = {
     "BUCK": ["DOLLAR", "DEER"],
     "BUFFALO": ["BUBALINA", "BISON"],
     "BUG": ["HEMIPTERA", "INSECT"],
-    "BUGLE": ["Bugle"],
 
     "CENTER": ["CENTRE"],
 
