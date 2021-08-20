@@ -57,102 +57,42 @@ def output_scores(term, id_to_title):
         redirected_source_ids.add(redirected_id)
     page_counts = page_extracts_database.get_term_page_counts(term)
 
-    source_links, directions_1 = wiki_database.fetch_all_links(redirected_source_ids)
-    incoming_links = wiki_database.fetch_incoming_links_set(redirected_source_ids)
-    citation_titles = citations.get_term_citations(term)
-    link_1_ids = set()
-
-    link_1_count = count_links_dict(source_links)
-    print("1st degree: " + str(link_1_count))
-    bar = progressbar.ProgressBar(maxval=link_1_count, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    count = len(page_counts)
+    print("Count: {0}".format(count))
+    bar = progressbar.ProgressBar(maxval=count, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     i = 0
     bar.start()
 
     stemmer = PorterStemmer()
     lemmatizer = WordNetLemmatizer()
 
-    for source_id in source_links:
-        source_title = id_to_title[source_id_redirect_origins[source_id]]
-        
-        for link_1_id in source_links[source_id]:
-            if link_1_id not in id_to_title:
+    for title in page_counts:
+        term_count = page_counts[title]
+        if term_count == 0:
+            continue
+
+        title_words = extract_title_clues(title, term)
+        # We need to count title words separately since we should include term and stopwords in divisor.
+        title_words_count = count_title_words(title)
+        title_words = set(map(lambda x:x.upper(), title_words))
+        if len(title_words) == 0:
+            continue
+
+        score = 1 - 0.7 ** term_count
+        score /= title_words_count
+
+        for word in title_words:
+            word_lower = word.lower()
+            term_lower = term.lower()
+            if word_lower == term_lower or stemmer.stem(word_lower) == term_lower or lemmatizer.lemmatize(word_lower) == term_lower:
                 continue
-            link_1_title = id_to_title[link_1_id]
-            # If the only connection between term and page is a citation
-            if link_1_id not in incoming_links and link_1_title in citation_titles:
-                continue
-            link_1_words = extract_title_clues(link_1_title, term)
-            # We need to count title words separately since we should include term and stopwords in divisor.
-            link_1_words_count = count_title_words(link_1_title)
-            link_1_words = set(map(lambda x:x.upper(), link_1_words))
-            if len(link_1_words) == 0:
-                continue
 
-            term_count = 0
-            if link_1_title in page_counts:
-                term_count = page_counts[link_1_title]
+            if word not in scores or scores[word] < score:
+                scores[word] = score
+                paths[word] = title
 
-            link_strength, link_str = get_link_strength_and_str(directions_1, source_id, link_1_id)
-            path_str = source_title + link_str + link_1_title
-
-            score = 1 - 0.7 ** term_count
-            score /= link_1_words_count
-
-            for word in link_1_words:
-                word_lower = word.lower()
-                term_lower = term.lower()
-                if word_lower == term_lower or stemmer.stem(word_lower) == term_lower or lemmatizer.lemmatize(word_lower) == term_lower:
-                    continue
-
-                if word not in scores or scores[word] < score:
-                    scores[word] = score
-                    paths[word] = path_str
-
-            page_scores[link_1_id] = score
-            page_paths[link_1_id] = path_str
-
-            # We only want to score second-degree links of crawled articles.
-            # Otherwise there will be too many.
-            if term_count > 0:
-                link_1_ids.add(link_1_id)
-            i += 1
-            bar.update(i)
-    bar.finish()
-
-    link_1_links = wiki_database.fetch_double_links(link_1_ids)
-
-    link_2_count = count_links_dict(link_1_links)
-    print("1st degree to expand: " + str(len(link_1_ids)))
-    print("2nd degree: " + str(link_2_count))
-    bar = progressbar.ProgressBar(maxval=link_2_count, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    i = 0
-    bar.start()
-
-    for link_1_id in link_1_links:
-        link_1_score = page_scores[link_1_id]
-        for link_2_id in link_1_links[link_1_id]:
-            if link_2_id not in id_to_title:
-                continue
-            if link_2_id in link_1_ids:
-                continue
-            link_2_title = id_to_title[link_2_id]
-            link_2_words = extract_title_clues(link_2_title, term)
-            link_2_words_count = count_title_words(link_2_title)
-            if len(link_2_words) != 1:
-                continue
-            #link_strength, link_str = get_link_strength_and_str(directions_2, link_1_id, link_2_id)
-            #score = link_1_score / 10 * link_strength
-            score = link_1_score / 5
-            score /= link_2_words_count
-
-            for word in link_2_words:
-                if word not in scores or scores[word] < score:
-                    scores[word] = score
-                    #paths[word] = page_paths[link_1_id] + link_str + link_2_title
-                    paths[word] = page_paths[link_1_id] + '<->' + link_2_title
-
-            i += 1
-            bar.update(i)
+        i += 1
+        bar.update(i)
     bar.finish()
 
     print("Inserting: " + str(len(scores)))

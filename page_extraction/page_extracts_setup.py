@@ -69,16 +69,15 @@ def expand_link_scores(term_link_scores, source_ids):
     return link_ids, double_link_ids
 
 
-def get_top_double_links(double_links, link_scores, id_to_title, term_target_pages):
+def get_top_double_links(double_links, link_scores, id_to_title):
     print("DOUBLE Links")
     all_double_links = set()
     
-    bar = progressbar.ProgressBar(maxval=len(term_target_pages), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar = progressbar.ProgressBar(maxval=len(TERM_PAGES), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
     i = 0
-    for term in term_target_pages:
+    for term in TERM_PAGES:
         term_double_links = get_top_pages(double_links[term], link_scores, id_to_title, DOUBLE_LINKS)
-        term_target_pages[term].update(term_double_links)
         print("{0}: {1}".format(term, len(term_double_links)))
         all_double_links.update(term_double_links)
         i += 1
@@ -88,9 +87,9 @@ def get_top_double_links(double_links, link_scores, id_to_title, term_target_pag
     return all_double_links
 
 
-def get_top_pair_links(term_links, link_scores, id_to_title, term_target_pages):
+def get_top_pair_links(term_links, link_scores, id_to_title):
     print("PAIR LINKS")
-    terms = list(term_target_pages.keys())
+    terms = list(TERM_PAGES.keys())
     all_pair_links = set()
 
     pairs = math.comb(len(terms), 2)
@@ -106,8 +105,6 @@ def get_top_pair_links(term_links, link_scores, id_to_title, term_target_pages):
             links2 = term_links[term2]
             links = links1.intersection(links2)
             pair_links = get_top_pages(links, link_scores, id_to_title, PAIR_LINKS)
-            term_target_pages[term1].update(pair_links)
-            term_target_pages[term2].update(pair_links)
             all_pair_links.update(pair_links)
             print("{0} | {1}: {2}".format(term1, term2, len(pair_links)))
 
@@ -133,11 +130,10 @@ def get_top_pages(links, link_scores, id_to_title, count):
     return list(map(lambda x: x[0], double_link_scores[:count]))
 
 
-def insert_term_pages(term, pages):
-    term_synonyms = get_synonyms(term)
-    for page in pages:
-        for synonym in term_synonyms:
-            page_extracts_database.insert_term_page(term, synonym, page)
+def insert_page(title):
+    for term in TERM_PAGES:
+        for synonym in get_synonyms(term):
+            page_extracts_database.insert_term_page(term, synonym, title)
     page_extracts_database.commit()
 
 
@@ -146,21 +142,17 @@ def job(terms):
     id_to_title = wiki_database.get_all_titles_dict()
     links, double_links, link_scores = get_links(terms)
 
-    term_target_pages = {}
-    for term in terms:
-        term_target_pages[term] = set()
-
-    top_double_links = get_top_double_links(double_links, link_scores, id_to_title, term_target_pages)
-    top_pair_links = get_top_pair_links(links, link_scores, id_to_title, term_target_pages)
+    top_double_links = get_top_double_links(double_links, link_scores, id_to_title)
+    top_pair_links = get_top_pair_links(links, link_scores, id_to_title)
     top_links = top_double_links.union(top_pair_links)
     print("TOTAL LINKS: {0}".format(len(top_links)))
 
     print("INSERTING")
-    bar = progressbar.ProgressBar(maxval=len(TERM_PAGES), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar = progressbar.ProgressBar(maxval=len(top_links), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
     i = 0
-    for term in term_target_pages:
-        insert_term_pages(term, term_target_pages[term])
+    for title in top_links:
+        insert_page(title)
         i += 1
         bar.update(i)
     bar.finish()

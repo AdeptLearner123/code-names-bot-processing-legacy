@@ -131,7 +131,9 @@ def get_term_page_counts(term):
     title_count = {}
     cur.execute("SELECT word, title, count FROM page_extracts WHERE is_source=0 AND term=?", [term])
     for row in cur.fetchall():
-        word, title, count= row
+        word, title, count = row
+        if count is None:
+            continue
         if title not in title_count:
             title_count[title] = 0
         title_count[title] += count

@@ -23,6 +23,7 @@ def job():
         title_words[title].add(word)
 
     print("Getting pages {0}".format(len(title_words)))
+
     bar = progressbar.ProgressBar(maxval=len(title_words), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
     i = 0
