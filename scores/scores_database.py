@@ -1,7 +1,11 @@
 import sqlite3
 
-con = sqlite3.connect('scores/scores.sqlite')
-cur = con.cursor()
+
+def init(file_name):
+    global con
+    global cur
+    con = sqlite3.connect('scores/{0}.sqlite'.format(file_name))
+    cur = con.cursor()
 
 def setup():
     cur.execute(
@@ -55,7 +59,10 @@ def get_scores(term):
 
 def get_term_clue(term, clue):
     cur.execute("SELECT score, path FROM term_clue WHERE term=? AND clue=?", [term, clue])
-    return cur.fetchone()
+    row = cur.fetchone()
+    if row is None:
+        return None, None
+    return row
 
 
 def clear_term_clues(term):
@@ -70,3 +77,6 @@ def clear():
     con.commit()
     cur.execute("VACUUM")
     con.commit()
+
+
+init("scores")
