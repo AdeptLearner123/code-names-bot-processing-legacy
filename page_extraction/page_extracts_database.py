@@ -12,6 +12,7 @@ def setup():
                 title TEXT NOT NULL,
                 count REAL DEFAULT NULL,
                 excerpt TEXT DEFAULT NULL,
+                is_source BIT NOT NULL,
                 CONSTRAINT term_word_title_unique UNIQUE (term, word, title)
             );
         """
