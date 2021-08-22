@@ -16,7 +16,7 @@ def count_terms(page_title, target_term, text):
 
 def count_terms_multi(page_title, target_terms, text):
     sentences = get_sentences(text)
-    sentence_nouns_list, sentence_ne_list = get_sentence_nouns(sentences)
+    sentence_nouns_list, sentence_ne_list = get_sentence_nouns(sentences, target_terms)
 
     _, _, title_sentence_counts = count_term(page_title, sentences, sentence_nouns_list, sentence_ne_list)
     term_counts = {}
@@ -45,10 +45,11 @@ def get_sentences(html):
     return sentences
 
 
-def get_sentence_nouns(sentences):
+def get_sentence_nouns(sentences, terms):
     lemmatizer = WordNetLemmatizer()
     sentence_nouns_list = []
     sentence_ne_list = []
+    terms_set = set(map(lambda term:term.lower(), terms))
 
     for sentence in sentences:
         pos_words = pos_tag(word_tokenize(sentence))
@@ -56,8 +57,18 @@ def get_sentence_nouns(sentences):
         sentence_nouns = filter(lambda word_pos: word_pos[1].startswith('NN') and not word_pos[1] == "NNP", pos_words)
         sentence_nouns = list(map(lambda noun_pos:lemmatizer.lemmatize(noun_pos[0]), sentence_nouns))
         sentence_nouns_list.append(sentence_nouns)
-    
-        sentence_ne_list.append(get_ne_chunks(pos_words))
+
+        should_chunk = False
+        sentence_proper_nouns = filter(lambda word_pos: word_pos[1].startswith('NNP'), pos_words)
+        for proper_noun, pos in sentence_proper_nouns:
+            for proper_noun_word in word_tokenize(proper_noun):
+                if proper_noun_word.lower() in terms_set:
+                    should_chunk = True
+                    break
+        if should_chunk:
+            sentence_ne_list.append(get_ne_chunks(pos_words))
+        else:
+            sentence_ne_list.append([])
 
     return sentence_nouns_list, sentence_ne_list
 
