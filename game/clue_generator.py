@@ -60,11 +60,10 @@ def get_neg_scores(neg_terms, term_scores):
 
 
 def print_clue_term(term, clue, show_extracts=False):
-    term_clue = scores_database.get_term_clue(term, clue)
-    if term_clue is None:
+    score, path = scores_database.get_term_clue(term, clue)
+    if score is None or path is None:
         print("Term: {0} N/A".format(term))
     else:
-        score, path = term_clue
         end_title = path.replace('<->', '|').replace('<-', '|').replace('->', '|').split('|')[-1]
         print("Term: {0} Score: {1} Path: {2}".format(term, score, path))
         if show_extracts:
