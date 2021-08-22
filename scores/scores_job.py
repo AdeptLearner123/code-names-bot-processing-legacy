@@ -63,7 +63,6 @@ def output_scores(term, id_to_title):
     i = 0
     bar.start()
 
-    stemmer = PorterStemmer()
     lemmatizer = WordNetLemmatizer()
 
     for title in page_counts:
@@ -84,7 +83,7 @@ def output_scores(term, id_to_title):
         for word in title_words:
             word_lower = word.lower()
             term_lower = term.lower()
-            if word_lower == term_lower or stemmer.stem(word_lower) == term_lower or lemmatizer.lemmatize(word_lower) == term_lower:
+            if word_lower == term_lower or lemmatizer.lemmatize(word_lower) == term_lower:
                 continue
 
             if word not in scores or scores[word] < score:
