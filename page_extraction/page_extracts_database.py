@@ -135,9 +135,8 @@ def get_term_page_counts(term):
         word, title, count = row
         if count is None:
             continue
-        if title not in title_count:
-            title_count[title] = 0
-        title_count[title] += count
+        if title not in title_count or title_count[title] < count:
+            title_count[title] = count
     return title_count
 
 
@@ -174,6 +173,13 @@ def get_non_source_titles():
 
 def clear_source_entries():
     cur.execute("DELETE FROM page_extracts WHERE is_source=1;")
+    con.commit()
+    cur.execute("VACUUM")
+    con.commit()
+
+
+def clear_count_excerpt():
+    cur.execute("UPDATE page_extracts SET count=NULL, excerpt=NULL;")
     con.commit()
     cur.execute("VACUUM")
     con.commit()
