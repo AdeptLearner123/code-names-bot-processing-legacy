@@ -1,6 +1,8 @@
 from nltk.corpus import stopwords
 from nltk.stem.porter import *
 
+stop_words = set(stopwords.words('english'))
+stop_words.update(set(["list", "de"]))
 
 def trim_suffix(clue_title):
     if '_(' in clue_title:
@@ -26,9 +28,6 @@ def count_title_words(clue_title):
 def extract_title_words(title):
     title = trim_suffix(title)
     title_words = title.split('_')
-    
-    stop_words = set(stopwords.words('english'))
-    stop_words.update(set(["list", "de"]))
     
     cleaned_title_words = []
     for word in title_words:
