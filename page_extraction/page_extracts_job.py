@@ -35,9 +35,6 @@ def job():
             continue
         counts, excerpts = page_extractor.count_terms_multi(title, title_words[title], text)
         crawl_counter += 1
-        #if counts is None or excerpts is None:
-        #    print("Skipping")
-        #    continue
         for word in title_words[title]:
             page_extracts_database.insert_count_excerpt(word, title, counts[word], excerpts[word])
         page_extracts_database.commit()
