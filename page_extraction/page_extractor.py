@@ -28,6 +28,19 @@ def count_terms_multi(page_title, target_terms, text):
     return term_counts, term_excerpts
 
 
+def extract_noun_counts(text):
+    sentences = get_sentences(text)
+    sentence_nouns_list, _ = get_sentence_nouns(sentences, [])
+    noun_counts = {}
+    for nouns_list in sentence_nouns_list:
+        for noun in nouns_list:
+            noun = noun.upper()
+            if noun not in noun_counts:
+                noun_counts[noun] = 0
+            noun_counts[noun] += 1
+    return noun_counts
+
+
 def get_sentences(html):
     # Add extra space around tags so we don't get sentences without a space by the period.
     html = html.replace('<', ' <').replace('>', '> ')

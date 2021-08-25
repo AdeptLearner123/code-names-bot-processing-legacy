@@ -10,30 +10,32 @@ from page_downloads import page_downloads_database
 
 
 URL_PREFIX = 'https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles='
+SIMPLE_URL_PREFIX = 'https://simple.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&titles='
 
-def download_multi(target_titles):
+
+def download_multi(target_titles, is_simple=False):
     start_time = time.time()
-    filtered_titles = page_downloads_database.get_not_downloaded(target_titles)
+    filtered_titles = page_downloads_database.get_not_downloaded(target_titles, is_simple)
     print("DOWNLOADING Target: {0}  Not downloaded: {1}".format(len(target_titles), len(filtered_titles)))
 
     bar = progressbar.ProgressBar(maxval=len(filtered_titles), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
     i = 0
     for title in filtered_titles:
-        text = download_text(title)
+        text = download_text(title, is_simple)
         if text is None:
             print("Failed: {0}".format(title))
         else:
-            page_downloads_database.insert_page(title, text)
+            page_downloads_database.insert_page(title, text, is_simple)
         i += 1
         bar.update(i)
     bar.finish()
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
-def download_text(page_title):
+def download_text(page_title, is_simple):
     formatted_title = page_title.replace('\\', '')
-    url = URL_PREFIX + parse.quote_plus(formatted_title)
+    url = (SIMPLE_URL_PREFIX if is_simple else URL_PREFIX) + parse.quote_plus(formatted_title)
 
     try:
         response = urlopen(url, timeout=10)
