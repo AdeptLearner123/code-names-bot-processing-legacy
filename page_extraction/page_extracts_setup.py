@@ -1,10 +1,14 @@
+import progressbar
+import math
+from random import sample
+
 from utils.term_pages import TERM_PAGES
 from utils import wiki_database
 from utils.title_utils import count_title_words
 from utils.term_synonyms import get_synonyms
 from page_extraction import page_extracts_database
 
-PAGES_PER_LINK = 50
+PAGES_PER_PAIR = 10
 
 def get_term_links():
     page_scores = dict()
@@ -42,11 +46,37 @@ def filter_single_titles(page_ids, id_to_title):
     return set(filter(lambda title: count_title_words(title) == 1, titles))
 
 
-def get_top_links(titles, page_scores):
-    sorted_titles = list(sorted(titles, key=lambda title:page_scores[title], reverse=True))
-    if "Bivalvia" in sorted_titles:
-        print("Bivalvia: {0}".format(sorted_titles.index("Bivalvia")))
-    return sorted_titles[:PAGES_PER_LINK]
+def get_multi_links(page_scores):
+    multi_links = set(map(lambda item:item[0], filter(lambda item:item[1] >= 3, page_scores.items())))
+    return multi_links
+
+
+def get_pair_links(term_links):
+    print("PAIR LINKS")
+    terms = list(TERM_PAGES.keys())
+    all_pair_links = set()
+
+    pairs = math.comb(len(terms), 2)
+    iter = 0
+    bar = progressbar.ProgressBar(maxval=pairs, widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar.start()
+    for i in range(len(terms)):
+        for j in range(i + 1, len(terms)):
+            term1 = terms[i]
+            term2 = terms[j]
+
+            links1 = term_links[term1]
+            links2 = term_links[term2]
+            links = links1.intersection(links2)
+            pair_links = sample(links, min(PAGES_PER_PAIR, len(links)))
+            all_pair_links.update(pair_links)
+            print("{0} | {1}: {2} {3}".format(term1, term2, len(pair_links), len(links)))
+
+            iter += 1
+            bar.update(iter)
+    
+    bar.finish()
+    return all_pair_links
 
 
 def insert_page(title):
@@ -57,12 +87,23 @@ def insert_page(title):
 
 def job():
     page_scores, term_links = get_term_links()
-    print("Bivalvia Score: {0}".format(page_scores["Bivalvia"]))
-    target_titles = set()
-    for term in TERM_PAGES:
-        print("Getting top: " + term)
-        target_titles.update(get_top_links(term_links[term], page_scores))
-    #for title in target_titles:
-    #    insert_page(title)
-    #print("INSERTING: {0}".format(target_titles))
-    #page_extracts_database.commit()
+    multi_links = get_multi_links(page_scores)
+
+    for term in term_links:
+        term_links[term] = term_links[term].difference(multi_links)
+
+    pair_links = get_pair_links(term_links)
+    target_links = multi_links.union(pair_links)
+    print("MULTI LINKS: {0}".format(len(multi_links)))
+    print("PAIR LINKS: {0}".format(len(pair_links)))
+    print("TOTAL: {0}".format(len(target_links)))
+
+    iter = 0
+    bar = progressbar.ProgressBar(maxval=len(target_links), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar.start()
+    for title in target_links:
+        insert_page(title)
+        iter += 1
+        bar.update(iter)
+    bar.finish()
+    page_extracts_database.commit()
