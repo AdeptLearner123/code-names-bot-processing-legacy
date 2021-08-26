@@ -42,6 +42,13 @@ def extract_noun_counts(text):
 
 
 def get_sentences(html):
+    text = format_text(html)
+    sentences = sent_tokenize(text)
+    sentences = list(map(lambda sentence:sentence.strip(), sentences))
+    return sentences
+
+
+def format_text(html):
     # Add extra space around tags so we don't get sentences without a space by the period.
     html = html.replace('<', ' <').replace('>', '> ')
     soup = BeautifulSoup(html)
@@ -51,11 +58,8 @@ def get_sentences(html):
     # Remove duplicate spaces
     text = re.sub(' +', ' ', text)
     text = text.replace(' ,', ',').replace(' .', '.')
-
     text = text.replace('\n', '. ')
-    sentences = sent_tokenize(text)
-    sentences = list(map(lambda sentence:sentence.strip(), sentences))
-    return sentences
+    return text
 
 
 def get_sentence_nouns(sentences, terms):
