@@ -1,3 +1,4 @@
+from sqlite3.dbapi2 import TimeFromTicks
 import spacy
 nlp = spacy.load("en_core_web_sm")
 import progressbar
@@ -10,7 +11,7 @@ from page_downloads import page_downloader
 from page_downloads import page_downloads_database
 from nltk.stem import WordNetLemmatizer
 
-def get_source_page_counts(title):
+def get_source_page_counts(title, term):
     page_id = wiki_database.title_to_id(title)
     page_id = wiki_database.get_redirected_id(page_id)
     
@@ -22,6 +23,17 @@ def get_source_page_counts(title):
     first_words = page_ids_to_words(first_outgoing_ids)
     second_words = page_ids_to_words(second_outgoing_ids)
     words = first_words.union(second_words)
+
+    print("Words: {0} {1} {2}".format(len(first_words), len(second_words), len(words)))
+
+    root_counts, root_chunks = page_extractor.extract_noun_chunks(page_downloads_database.get_content(title))
+    word_counts = dict()
+    word_chunks = dict()
+    for word in words:
+        if word in root_counts:
+            word_counts[word] = root_counts[word]
+            word_chunks[word] = root_chunks[word]
+    return word_counts, word_chunks
 
     lemmatizer = WordNetLemmatizer()
 
@@ -56,15 +68,6 @@ def get_source_page_counts(title):
 
     return word_counts, word_chunks
 
-    noun_counts = page_extractor.extract_noun_counts(page_downloads_database.get_content(title))
-    words = first_words.union(filtered_second_words)
-    print("Words: {0} {1} {2} {3}".format(len(first_words), len(second_words), len(filtered_second_words), len(words)))
-    word_counts = dict()
-    for word in words:
-        if word in noun_counts:
-            word_counts[word] = noun_counts[word]
-    return word_counts
-
 
 def page_ids_to_words(ids):
     titles = wiki_database.get_titles_set(ids)
@@ -78,9 +81,8 @@ def page_ids_to_words(ids):
 def get_counts(term):
     noun_counts = {}
     noun_chunks = {}
-    #page_downloader.download_multi(TERM_PAGES[term], True)
     for title in TERM_PAGES[term]:
-        title_noun_counts, title_noun_chunks = get_source_page_counts(title)
+        title_noun_counts, title_noun_chunks = get_source_page_counts(title, TimeFromTicks)
         for noun in title_noun_counts:
             if noun not in noun_counts or noun_counts[noun] < title_noun_counts[noun]:
                 noun_counts[noun] = title_noun_counts[noun]

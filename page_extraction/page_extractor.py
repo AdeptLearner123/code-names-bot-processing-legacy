@@ -5,6 +5,8 @@ from nltk import word_tokenize
 from nltk import sent_tokenize
 from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
+import spacy
+nlp = spacy.load("en_core_web_sm")
 
 from utils.nlp_utils import get_ne_chunks
 
@@ -39,6 +41,27 @@ def extract_noun_counts(text):
                 noun_counts[noun] = 0
             noun_counts[noun] += 1
     return noun_counts
+
+
+def extract_noun_chunks(text):
+    root_counts = dict()
+    root_chunks = dict()
+    lemmatizer = WordNetLemmatizer()
+    text = format_text(text)
+    doc = nlp(text)
+
+    for chunk in doc.noun_chunks:
+        nc = chunk.text.lower()
+        root = lemmatizer.lemmatize(chunk.root.text).upper()
+        if re.compile(r'[0-9]').search(nc):
+            continue
+        if root not in root_counts:
+            root_counts[root] = 1
+            root_chunks[root] = set([nc])
+        else:
+            root_counts[root] += 1
+            root_chunks[root].add(nc)
+    return root_counts, root_chunks
 
 
 def get_sentences(html):
