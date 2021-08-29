@@ -83,7 +83,7 @@ def output_scores(term, id_to_title):
         for word in title_words:
             word_lower = word.lower()
             term_lower = term.lower()
-            if word_lower == term_lower or lemmatizer.lemmatize(word_lower) == term_lower:
+            if term_lower in word_lower or lemmatizer.lemmatize(word_lower) == term_lower:
                 continue
 
             if word not in scores or scores[word] < score:
