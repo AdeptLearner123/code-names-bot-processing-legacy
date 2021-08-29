@@ -180,13 +180,13 @@ TERM_PAGES = {
     "HOTEL": ["Hotel"],
 
     "ICE": ["Digital_ICE", "Ice"],
-    "ICE CREAM": ["Ice_cream"]
+    "ICE CREAM": ["Ice_cream"],
     "INDIA": ["India"],
     "IRON": ["Branding_iron", "Clothes_iron", "Hair_iron", "Soldering_iron", "Iron"],
     "IVORY": ["Ivory"],
     
     "JACK": ["Jack_(device)", "Jack_the_Ripper", "Jack_(given_name)"],
-    "JAM": ["Fruit_preserves", "Radio_jamming"]
+    "JAM": ["Fruit_preserves", "Radio_jamming"],
     "JET": ["Jet_aircraft"],
     "JUPITER": ["Jupiter"],
     
@@ -203,7 +203,7 @@ TERM_PAGES = {
     "LAP": ["Lap", "Race_track", "Swimming_pool"],
     "LASER": ["Laser"],
     "LAWYER": ["Lawyer"],
-    "LEAD": ["Leading_actor", "Lead"]
+    "LEAD": ["Leading_actor", "Lead"],
     "LEMON": ["Lemon"],
     "LEPRECHAUN": ["Leprechaun"],
     "LIFE": ["Life", "Personal_life", "Everyday_life"],
@@ -215,7 +215,7 @@ TERM_PAGES = {
     "LOCH NESS": ["Loch_Ness", "Loch_Ness_(disambiguation)"],
     "LOCK": ["Lock_and_key", "Lock_(water_navigation)"],
     "LOG": ["Lumber", "Firewood", "Logging", "Trunk_(botany)", "Log_file", "Logarithm"],
-    "LONDON": ["London"]
+    "LONDON": ["London"],
     "LUCK": ["Luck"],
     
     "MAIL": ["Mail", "Chain_mail"],
@@ -232,18 +232,18 @@ TERM_PAGES = {
     "MINE": ["Miner", "Mining", "Land_mine"],
     "MINT": ["Mint_(facility)", "Spearmint", "Mentha"],
     "MISSILE": ["Missile"],
-    "MODEL": ["Model"]
+    "MODEL": ["Model"],
     "MOLE": ["Mole_(unit)", "Nevus", "Mole_(animal)", "Golden_mole", "Marsupial_mole"],
     "MOON": ["Moon"],
     "MOSCOW": ["Moscow"],
-    "MOUNT": ["Mountain", "Mount_(grappling)"]
+    "MOUNT": ["Mountain", "Mount_(grappling)"],
     "MOUSE": ["Mickey_Mouse", "Computer_mouse", "Mouse"],
     "MOUTH": ["River_mouth", "Mouth"],
     "MUG": ["Mug", "Mug_shot"],
 
     "NAIL": ["Nail_(fastener)", "Nail_(anatomy)"],
     "NEEDLE": ["Knitting_needle", "Sewing_needle", "Pine", "Hypodermic_needle"],
-    "NET": ["Net_(device)", "Net_(economics)", "Internet", "Net_sport"]
+    "NET": ["Net_(device)", "Net_(economics)", "Internet", "Net_sport"],
     "NEW YORK": ["New_York_City", "New_York_(state)"],
     "NIGHT": ["Night"],
     "NINJA": ["Ninja", "Ninja_(gamer)"],

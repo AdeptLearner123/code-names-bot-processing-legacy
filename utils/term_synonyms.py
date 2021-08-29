@@ -53,6 +53,7 @@ SYNONYMS = {
     
     "PANTS": ["TROUSERS"],
 
+    "SCUBA DIVER": ["SCUBA", "DIVER"],
     "SPY": ["ESPIONAGE"],
 
     "TRUNK": ["TORSO"]
