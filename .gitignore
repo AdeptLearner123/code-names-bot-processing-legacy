@@ -2,6 +2,7 @@ wiki.sqlite
 term_counts.sqlite
 Notebooks/
 Profiling/
+profiling/
 .ipynb_checkpoints/
 .DS_Store
 __pycache__/
@@ -11,3 +12,5 @@ csv_output/
 *.zip
 *.sqlite
 runtimes.txt
+
+terms_formatted.txt

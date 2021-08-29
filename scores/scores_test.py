@@ -10,7 +10,8 @@ positive_scores = [
     ("MAMMOTH", "ANIMAL"),
     ("BLOCK", "VOLLEYBALL"),
     ("ANGEL", "CALIFORNIA"),
-    ("ALIEN", "KAIJU")
+    ("ALIEN", "KAIJU"),
+    ("BRIDGE", "RIVER")
 ]
 
 negative_scores = [
@@ -58,7 +59,7 @@ negative_scores = [
 
 
 def test_multi():
-    file_names = ["scores #1", "scores #2", "scores #3", "scores"]
+    file_names = ["scores #1", "scores #2", "scores #3", "scores #4", "scores #5", "scores #6", "scores #7", "scores #8", "scores #9", "scores"]
     for file_name in file_names:
         scores_database.init(file_name)
         print("TESTING: {0}".format(file_name))
