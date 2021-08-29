@@ -7,13 +7,14 @@ from utils import wiki_database
 from utils.title_utils import count_title_words
 from utils.term_synonyms import get_synonyms
 from page_extraction import page_extracts_database
+from utils.term_config import NEIGHBORS_ONLY
 
 PAGES_PER_PAIR = 10
 
 def get_term_links():
+    id_to_title = wiki_database.get_all_titles_dict()
     page_scores = dict()
     term_links = dict()
-    id_to_title = wiki_database.get_all_titles_dict()
 
     for term in TERM_PAGES:
         source_titles = TERM_PAGES[term]
@@ -79,10 +80,23 @@ def get_pair_links(term_links):
     return all_pair_links
 
 
-def insert_page(title):
+def insert_pages(target_links, term_links):
+    iter = 0
+    bar = progressbar.ProgressBar(maxval=len(target_links), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar.start()
+    for title in target_links:
+        insert_page(title)
+        iter += 1
+        bar.update(iter)
+    bar.finish()
+    page_extracts_database.commit()
+
+
+def insert_page(title, term_links):
     for term in TERM_PAGES:
-        for synonym in get_synonyms(term):
-            page_extracts_database.insert_term_page(term, synonym, title)
+        if term not in NEIGHBORS_ONLY or title in term_links[term]:
+            for synonym in get_synonyms(term):
+                page_extracts_database.insert_term_page(term, synonym, title)
 
 
 def job():
@@ -98,12 +112,4 @@ def job():
     print("PAIR LINKS: {0}".format(len(pair_links)))
     print("TOTAL: {0}".format(len(target_links)))
 
-    iter = 0
-    bar = progressbar.ProgressBar(maxval=len(target_links), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    bar.start()
-    for title in target_links:
-        insert_page(title)
-        iter += 1
-        bar.update(iter)
-    bar.finish()
-    page_extracts_database.commit()
+    insert_pages(target_links)

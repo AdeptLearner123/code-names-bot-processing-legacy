@@ -190,3 +190,11 @@ def clear():
     con.commit()
     cur.execute("VACUUM")
     con.commit()
+
+
+def filter_term_titles(term, titles):
+    query = "DELETE FROM page_extracts WHERE term=? AND title NOT IN ({0})".format(placeholder_list(titles))
+    cur.execute(query, [term] + list(titles))
+    con.commit()
+    cur.execute("VACUUM")
+    con.commit()
