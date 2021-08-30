@@ -1,3 +1,4 @@
+from utils.term_pages import TERM_PAGES
 from scores import scores_database
 from page_extraction import page_extracts_database
 from utils.term_synonyms import SYNONYMS, get_synonyms
@@ -67,9 +68,14 @@ def print_clue_term(term, clue, show_extracts=False):
         end_title = path.replace('<->', '|').replace('<-', '|').replace('->', '|').split('|')[-1]
         print("Term: {0} Score: {1} Path: {2}".format(term, score, path))
         if show_extracts:
-            for synonym in get_synonyms(term):
-                term_count, extract = page_extracts_database.get_extract(synonym, end_title)
-                print("      {0}: Count: {1}   Extract: {2}".format(synonym, term_count, extract))
+            is_source = end_title in TERM_PAGES[term]
+            if is_source:
+                term_count, extract = page_extracts_database.get_extract(clue, end_title)
+                print("      {0}: Count: {1}   Extract: {2}".format(clue, term_count, extract))
+            else:
+                for synonym in get_synonyms(term):
+                    term_count, extract = page_extracts_database.get_extract(synonym, end_title)
+                    print("      {0}: Count: {1}   Extract: {2}".format(synonym, term_count, extract))
 
 
 def explore_clue(clue, pos_terms, neg_terms, show_extracts=False):

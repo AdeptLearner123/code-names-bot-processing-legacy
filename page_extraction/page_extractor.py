@@ -46,22 +46,26 @@ def extract_noun_counts(text):
 def extract_noun_chunks(text):
     root_counts = dict()
     root_chunks = dict()
+    root_excerpts = dict()
     lemmatizer = WordNetLemmatizer()
-    text = format_text(text)
-    doc = nlp(text)
-
-    for chunk in doc.noun_chunks:
-        nc = chunk.text.lower()
-        root = lemmatizer.lemmatize(chunk.root.text).upper()
-        if re.compile(r'[0-9]').search(nc):
-            continue
-        if root not in root_counts:
-            root_counts[root] = 1
-            root_chunks[root] = set([nc])
-        else:
-            root_counts[root] += 1
-            root_chunks[root].add(nc)
-    return root_counts, root_chunks
+    sentences = get_sentences(text)
+    
+    for sentence in sentences:
+        doc = nlp(sentence)
+        for chunk in doc.noun_chunks:
+            nc = chunk.text.lower()
+            root = lemmatizer.lemmatize(chunk.root.text).upper()
+            if re.compile(r'[0-9]').search(nc):
+                continue
+            if root not in root_counts:
+                root_counts[root] = 1
+                root_chunks[root] = set([nc])
+                root_excerpts[root] = [sentence]
+            else:
+                root_counts[root] += 1
+                root_chunks[root].add(nc)
+                root_excerpts[root].append(sentence)
+    return root_counts, root_chunks, root_excerpts
 
 
 def get_sentences(html):

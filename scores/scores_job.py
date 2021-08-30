@@ -32,12 +32,10 @@ def count_links_dict(links_dict):
     return total
 
 
-def output_scores(term, id_to_title):
+def output_scores(term):
     print("Counting: " + term)
     paths = {}
     scores = {}
-    page_scores = {}
-    page_paths = {}
 
     if term in SYNONYMS:
         for synonym in SYNONYMS[term]:
@@ -94,6 +92,20 @@ def output_scores(term, id_to_title):
         bar.update(i)
     bar.finish()
 
+    bar = progressbar.ProgressBar(maxval=len(source_titles), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    bar.start()
+    i = 0
+    for title in source_titles:
+        word_counts = page_extracts_database.get_title_counts(title)
+        for word in word_counts:
+            score = 1 - 0.7 ** word_counts[word]
+            if word not in scores or scores[word] < score:
+                scores[word] = score
+                paths[word] = title            
+        i += 1
+        bar.update(i)
+    bar.finish()
+
     print("Inserting: " + str(len(scores)))
     bar = progressbar.ProgressBar(maxval=len(scores), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     i = 0
@@ -110,8 +122,7 @@ def output_scores_job():
     start_time = time.time()
 
     print("Get all id to title")
-    id_to_title = wiki_database.get_all_titles_dict()
     for term in TERM_PAGES:
-        output_scores(term, id_to_title)
+        output_scores(term)
     
     print("--- %s seconds ---" % (time.time() - start_time))

@@ -49,6 +49,14 @@ def insert_count_excerpt(word, title, count, excerpt):
     cur.execute("UPDATE page_extracts SET count=?, excerpt=? WHERE word=? AND title=?;", [count, excerpt, word, title])
 
 
+def insert_term_page_count_excerpt(term, word, title, count, excerpt, is_source):
+    cur.execute("SELECT * FROM page_extracts WHERE term=? AND word=? AND title=?;", [term, word, title])
+    if cur.fetchone() is not None:
+        cur.execute("UPDATE page_extracts SET count=?, excerpt=? WHERE word=? AND title=?", [count, excerpt, word, title])
+        return
+    cur.execute("INSERT INTO page_extracts (term, word, title, count, excerpt, is_source) VALUES (?, ?, ?, ?, ?, ?);", [term, word, title, count, excerpt, is_source])
+
+
 def get_term_words(term):
     cur.execute("SELECT DISTINCT word FROM page_extracts WHERE term=?", [term])
     words = []
