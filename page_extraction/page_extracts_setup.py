@@ -2,12 +2,12 @@ import progressbar
 import math
 from random import sample
 
-from utils.term_pages import TERM_PAGES
 from utils import wiki_database
 from utils.title_utils import count_title_words
 from utils.term_synonyms import get_synonyms
 from page_extraction import page_extracts_database
 from utils.term_config import NEIGHBORS_ONLY
+from utils import term_utils
 
 PAGES_PER_PAIR = 10
 
@@ -16,10 +16,9 @@ def get_term_links():
     page_scores = dict()
     term_links = dict()
 
-    for term in TERM_PAGES:
-        source_titles = TERM_PAGES[term]
+    for term in term_utils.get_terms():
+        source_titles = term_utils.get_term_sources(term)
         source_ids = wiki_database.get_ids_set(source_titles)
-        source_ids = wiki_database.get_redirected_ids(source_ids)
         incoming = wiki_database.fetch_incoming_links_set(source_ids)
         incoming_titles = filter_single_titles(incoming, id_to_title)
         outgoing = wiki_database.fetch_outgoing_links_set(source_ids)
@@ -54,7 +53,7 @@ def get_multi_links(page_scores):
 
 def get_pair_links(term_links):
     print("PAIR LINKS")
-    terms = list(TERM_PAGES.keys())
+    terms = term_utils.get_terms()
     all_pair_links = set()
 
     pairs = math.comb(len(terms), 2)
@@ -80,7 +79,7 @@ def get_pair_links(term_links):
     return all_pair_links
 
 
-def insert_pages(target_links, term_links):
+def insert_pages(target_links):
     iter = 0
     bar = progressbar.ProgressBar(maxval=len(target_links), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
@@ -93,7 +92,7 @@ def insert_pages(target_links, term_links):
 
 
 def insert_page(title, term_links):
-    for term in TERM_PAGES:
+    for term in term_utils.get_terms():
         if term not in NEIGHBORS_ONLY or title in term_links[term]:
             for synonym in get_synonyms(term):
                 page_extracts_database.insert_term_page(term, synonym, title)
