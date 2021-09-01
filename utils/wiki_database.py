@@ -26,6 +26,11 @@ def setup():
             CREATE INDEX IF NOT EXISTS link_id_index ON links (id);
         """
     )
+    cur.execute(
+        """
+            CREATE INDEX IF NOT EXISTS title_index ON pages (title);
+        """
+    )
 
 
 def get_indexes():
@@ -38,6 +43,10 @@ def get_indexes():
     )
     return cur.fetchall()
 
+
+def title_exists(title):
+    cur.execute("SELECT id FROM pages WHERE title=?;", [title])
+    return cur.fetchone() is not None
 
 def title_to_id(title):
     cur.execute("SELECT id FROM pages WHERE title=?;", [title])

@@ -34,6 +34,9 @@ def insert_page(title, content, is_simple=False):
     if cur.fetchone() is not None:
         cur.execute("UPDATE page_downloads SET content=? WHERE title=? AND is_simple=?;", [content, title, is_simple])
     cur.execute("INSERT INTO page_downloads (title, content, is_simple) VALUES (?, ?, ?);", [title, content, is_simple])
+
+
+def commit():
     con.commit()
 
 

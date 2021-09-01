@@ -79,12 +79,12 @@ def get_pair_links(term_links):
     return all_pair_links
 
 
-def insert_pages(target_links):
+def insert_pages(target_links, term_links):
     iter = 0
     bar = progressbar.ProgressBar(maxval=len(target_links), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
     bar.start()
     for title in target_links:
-        insert_page(title)
+        insert_page(title, term_links)
         iter += 1
         bar.update(iter)
     bar.finish()
@@ -111,4 +111,4 @@ def job():
     print("PAIR LINKS: {0}".format(len(pair_links)))
     print("TOTAL: {0}".format(len(target_links)))
 
-    insert_pages(target_links)
+    insert_pages(target_links, term_links)
