@@ -22,30 +22,22 @@ def count_terms(page_title, target_term, text):
 
 def count_terms_multi(page_title, target_terms, text):
     sentences = get_sentences(text)
-    sentence_nouns_list, sentence_ne_list = get_sentence_nouns(sentences, target_terms)
+    sentence_words_list, sentence_ne_list = get_sentence_words(sentences)
     ne_tokenized, ne_counts, ne_sentence_counts = aggregate_ne_list(sentence_ne_list)
+    word_counts, word_sentence_counts = aggregate_word_list(sentence_words_list)
 
-    _, _, title_sentence_counts = count_term(page_title, sentences, sentence_nouns_list, ne_tokenized, ne_counts, ne_sentence_counts)
+    _, _, title_sentence_counts = count_term(page_title, sentences, word_counts, word_sentence_counts, ne_tokenized, ne_counts, ne_sentence_counts)
     term_counts = {}
     term_excerpts = {}
     for term in target_terms:
-        counted_term, count, sentence_counts = count_term(term, sentences, sentence_nouns_list, ne_tokenized, ne_counts, ne_sentence_counts)
+        counted_term, count, sentence_counts = count_term(term, sentences, word_counts, word_sentence_counts, ne_tokenized, ne_counts, ne_sentence_counts)
+        if counted_term is None:
+            term_counts[term] = 0
+            term_excerpts[term] = None
+            continue
         term_counts[term] = count
         term_excerpts[term] = get_excerpt(sentence_counts, title_sentence_counts, sentences)
     return term_counts, term_excerpts
-
-
-def extract_noun_counts(text):
-    sentences = get_sentences(text)
-    sentence_nouns_list, _ = get_sentence_nouns(sentences, [])
-    noun_counts = {}
-    for nouns_list in sentence_nouns_list:
-        for noun in nouns_list:
-            noun = noun.upper()
-            if noun not in noun_counts:
-                noun_counts[noun] = 0
-            noun_counts[noun] += 1
-    return noun_counts
 
 
 def extract_noun_chunks(text):
@@ -94,56 +86,46 @@ def format_text(html):
     return text
 
 
-def get_sentence_nouns(sentences, terms):
-    sentence_nouns_list = []
+def get_sentence_words(sentences):
+    sentence_words_list = []
     sentence_ne_list = []
-    terms_set = set(map(lambda term:term.lower(), terms))
 
     for sentence in sentences:
-        pos_words = tagger.tag(word_tokenize(sentence))
+        doc = nlp(sentence)
+        sentence_words = filter(lambda token: token.tag_[0:2] in VALID_POS and not token.tag_[1] == "NNP", doc)
+        sentence_words = list(map(lambda token: (token.lemma_, token.tag_[0:2]), sentence_words))
+        sentence_words_list.append(sentence_words)
 
-        sentence_nouns = filter(lambda word_pos: word_pos[1].startswith('NN') and not word_pos[1] == "NNP", pos_words)
-        sentence_nouns = list(map(lambda word_pos: word_pos[0], sentence_nouns))
-        sentence_nouns_list.append(sentence_nouns)
+        sentence_ne_list.append(list(map(lambda ent:ent.text, doc.ents)))
 
-        should_chunk = False
-        sentence_proper_nouns = filter(lambda word_pos: word_pos[1].startswith('NNP'), pos_words)
-        for proper_noun, pos in sentence_proper_nouns:
-            for proper_noun_word in word_tokenize(proper_noun):
-                if proper_noun_word.lower() in terms_set:
-                    should_chunk = True
-                    break
-        if should_chunk:
-            sentence_ne_list.append(get_ne_chunks(pos_words))
-        else:
-            sentence_ne_list.append([])
-
-    return sentence_nouns_list, sentence_ne_list
+    return sentence_words_list, sentence_ne_list
 
 
-def count_term(term, sentences, sentence_nouns_list, ne_tokenized, ne_counts, ne_sentence_counts):
+def count_term(term, sentences, word_counts, word_sentence_counts, ne_tokenized, ne_counts, ne_sentence_counts):
     if ' ' in term:
         return count_multi_word_term(term, sentences)
-    return count_single_word_term(term, sentence_nouns_list, ne_tokenized, ne_counts, ne_sentence_counts)
+    return count_single_word_term(term, word_counts,word_sentence_counts, ne_tokenized, ne_counts, ne_sentence_counts)
 
 
-def count_single_word_term(term, sentence_nouns_list, ne_tokenized, ne_counts, ne_sentence_counts):
-    common_noun_count = 0
-    common_noun_sentence_counts = []
-    variants = set([term, p.plural(term)])
-    for nouns_list in sentence_nouns_list:
-        count = len(list(filter(lambda noun:noun.upper() in variants, nouns_list)))
-        common_noun_count += count
-        common_noun_sentence_counts.append(count)
+def count_single_word_term(term, word_counts, word_sentence_counts, ne_tokenized, ne_counts, ne_sentence_counts):
+    valid_pos = set(filter(lambda pos: (term.lower(), pos) in word_counts, VALID_POS))
+    max_pos = max(valid_pos, key=lambda pos:word_counts.get((term.lower(), pos))) if len(valid_pos) > 0 else None
 
     valid_nes = set(filter(lambda ne:term.lower() in ne_tokenized[ne], ne_tokenized.keys()))
     max_ne = max(valid_nes, key=ne_counts.get) if len(valid_nes) > 0 else None
 
-    if max_ne is None or common_noun_count > ne_counts[max_ne]:
-        return term.lower(), common_noun_count, common_noun_sentence_counts
+    if max_pos is not None:
+        max_word_tag = (term.lower(), max_pos)
+        max_word_tag_sentence_counts = list(map(lambda word_count:word_count[max_word_tag] if max_word_tag in word_count else 0, word_sentence_counts))
+
+        if max_ne is None or word_counts[max_word_tag] > ne_counts[max_ne]:
+            return term.lower(), word_counts[max_word_tag], max_word_tag_sentence_counts
     
-    max_ne_sentence_counts = list(map(lambda ne_count:ne_count[max_ne] if max_ne in ne_count else 0, ne_sentence_counts))
-    return max_ne, ne_counts[max_ne], max_ne_sentence_counts
+    if max_ne is not None:
+        max_ne_sentence_counts = list(map(lambda ne_count:ne_count[max_ne] if max_ne in ne_count else 0, ne_sentence_counts))
+        return max_ne, ne_counts[max_ne], max_ne_sentence_counts
+    
+    return None, 0, [0] * len(word_sentence_counts)
 
 
 def count_multi_word_term(term, sentences):
@@ -175,6 +157,7 @@ def aggregate_ne_list(sentence_ne_list):
         for ne in ne_list:
             if ne not in ne_tokenized:
                 ne_tokenized[ne] = set(word.lower() for word in word_tokenize(ne))
+
             if ne in curr_ne_counts:
                 curr_ne_counts[ne] += 1
             else:
@@ -186,3 +169,22 @@ def aggregate_ne_list(sentence_ne_list):
                 ne_counts[ne] = 1
         ne_sentence_counts.append(curr_ne_counts)
     return ne_tokenized, ne_counts, ne_sentence_counts
+
+
+def aggregate_word_list(sentence_word_list):
+    word_counts = {}
+    word_sentence_counts = []
+    for word_list in sentence_word_list:
+        curr_word_counts = {}
+        for word_tag in word_list:
+            if word_tag in curr_word_counts:
+                curr_word_counts[word_tag] += 1
+            else:
+                curr_word_counts[word_tag] = 1
+
+            if word_tag in word_counts:
+                word_counts[word_tag] += 1
+            else:
+                word_counts[word_tag] = 1
+        word_sentence_counts.append(curr_word_counts)
+    return word_counts, word_sentence_counts
