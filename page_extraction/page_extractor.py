@@ -7,6 +7,8 @@ from nltk import pos_tag
 from nltk.stem import WordNetLemmatizer
 import spacy
 nlp = spacy.load("en_core_web_sm")
+import inflect
+p = inflect.engine()
 
 from utils.nlp_utils import get_ne_chunks
 
@@ -90,7 +92,6 @@ def format_text(html):
 
 
 def get_sentence_nouns(sentences, terms):
-    lemmatizer = WordNetLemmatizer()
     sentence_nouns_list = []
     sentence_ne_list = []
     terms_set = set(map(lambda term:term.lower(), terms))
@@ -99,7 +100,7 @@ def get_sentence_nouns(sentences, terms):
         pos_words = pos_tag(word_tokenize(sentence))
 
         sentence_nouns = filter(lambda word_pos: word_pos[1].startswith('NN') and not word_pos[1] == "NNP", pos_words)
-        sentence_nouns = list(map(lambda noun_pos:lemmatizer.lemmatize(noun_pos[0]), sentence_nouns))
+        sentence_nouns = list(map(lambda word_pos: word_pos[0], sentence_nouns))
         sentence_nouns_list.append(sentence_nouns)
 
         should_chunk = False
@@ -126,8 +127,12 @@ def count_term(term, sentences, sentence_nouns_list, sentence_ne_list):
 def count_single_word_term(term, sentence_nouns_list, sentence_ne_list):
     common_noun_count = 0
     common_noun_sentence_counts = []
+    variants = set([term, p.plural(term)])
+    print(variants)
     for nouns_list in sentence_nouns_list:
-        count = len(list(filter(lambda noun:noun.lower() == term.lower(), nouns_list)))
+        print(list(nouns_list))
+        count = len(list(filter(lambda noun:noun.upper() in variants, nouns_list)))
+        print(count)
         common_noun_count += count
         common_noun_sentence_counts.append(count)
 
