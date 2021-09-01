@@ -1,55 +1,70 @@
 from utils.term_synonyms import get_synonyms
 from nltk.stem.wordnet import WordNetLemmatizer
 from utils.title_utils import extract_title_words
+from utils.title_utils import trim_suffix
+from utils.title_utils import has_suffix
+from utils.title_utils import get_suffix
 from utils import wiki_database
-#from utils.term_pages_old import TERM_PAGES
+from utils.term_synonyms import get_synonyms
+from utils.term_source_supplements import SOURCE_SUPPLEMENTS
 
 TITLE_OVERRIDE = {
     "NEW YORK": "New_York",
     "LOCH NESS": "Loch_Ness"
 }
 
-SOURCE_OVERRIDE = {
-    "HIMALAYAS": ["Himalayas"],
-    "LIMOUSINE": ["Limousine"],
-    "PANTS": ["Trousers"],
-    "SCUBA DIVER": ["Scuba_diving"]
-}
+IGNORE_DISMAMBIGUATION = { 'LIMOUSINE', 'HIMALAYAS', 'PANTS', "SCUBA DIVER" }
 
 TERMS = list(open('terms.txt', 'r').read().splitlines())
-#TERMS = list(TERM_PAGES.keys())
+#IGNORE_SUFFIX_WORDS = set(['film', 'tv', 'song', 'album', 'radio'])
 
 def get_terms():
     return TERMS
 
 
-def validate_source_title(title, term):
-    title = title.lower()
-    if 'disambiguation' in title or 'list' in title:
+def validate_source_title(page_id, title, term):
+    title_lower = title.lower()
+    if 'disambiguation' in title_lower or 'list' in title_lower:
         return False
-    lemmatizer = WordNetLemmatizer()
-    title_words = extract_title_words(title)
-    title_words = set(filter(lambda word:lemmatizer.lemmatize(word), title_words))
-    for synonym in get_synonyms(term):
-        for word in synonym.split(' '):
-            if word.upper() in title_words:
-                return True
+
+    title_trimmed = trim_suffix(title)
+    synonyms = get_synonyms(term)
+    if title_trimmed.upper().replace('_', ' ') in synonyms:
+        if title_trimmed.isupper():
+            return False
+        if not has_suffix(title):
+            return True
+        else:
+            #suffix = get_suffix(title).lower()
+            #for ignore_suffix_word in IGNORE_SUFFIX_WORDS:
+             #   if ignore_suffix_word in suffix:
+              #      return False
+            return True
     return False
 
 
-def get_term_sources(term):
-    if term in SOURCE_OVERRIDE:
-        return SOURCE_OVERRIDE[term]
+def get_disambiguation_sources(term):
     disambiguation_title = get_disambiguation_title(term)
     disambiguation_id = wiki_database.title_to_id(disambiguation_title)
     disambiguation_id = wiki_database.get_redirected_id(disambiguation_id)
     source_ids = wiki_database.fetch_outgoing_links_set([disambiguation_id])
-    source_titles = wiki_database.get_titles_set(source_ids)
-    print(source_titles)
-    source_titles = set(filter(lambda title:validate_source_title(title, term), source_titles))
+    source_id_to_title = wiki_database.get_titles_dict(source_ids)
+    source_titles = set(filter(lambda item:validate_source_title(item[0], item[1], term), source_id_to_title.items()))
+    source_titles = set(map(lambda item:item[1], source_titles))
     return source_titles
 
 
+def get_term_sources(term):
+    sources = set()
+    if term in SOURCE_SUPPLEMENTS:
+        sources.update(set(SOURCE_SUPPLEMENTS[term]))
+    if term not in IGNORE_DISMAMBIGUATION:
+        sources.update(get_disambiguation_sources(term))
+    return sources
+
+
 def get_disambiguation_title(term):
+    if term in IGNORE_DISMAMBIGUATION:
+        return None
     title = term.capitalize().replace(' ', '_') if term not in TITLE_OVERRIDE else TITLE_OVERRIDE[term]
     return "{0}_(disambiguation)".format(title)

@@ -4,6 +4,16 @@ from nltk.stem.porter import *
 stop_words = set(stopwords.words('english'))
 stop_words.update(set(["list", "de"]))
 
+def has_suffix(title):
+    return '_(' in title
+
+
+def get_suffix(title):
+    if '_(' in title:
+        index = title.index('_(')
+        return title[index + 2:-1]
+    return ''
+
 def trim_suffix(clue_title):
     if '_(' in clue_title:
         index = clue_title.index('_(')
