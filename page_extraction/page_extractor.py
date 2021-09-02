@@ -33,7 +33,7 @@ def count_terms_multi(page_title, terms, text):
         counted_term, count, sentence_counts = count_term(term, sentences, term_ne, ne_counts, ne_sentence_counts, term_pos_counts, term_pos_sentence_counts)
         if counted_term is None:
             term_counts[term] = 0
-            term_excerpts[term] = None
+            term_excerpts[term] = ''
             continue
         term_counts[term] = count
         term_excerpts[term] = get_excerpt(sentence_counts, title_sentence_counts, sentences)
@@ -107,7 +107,6 @@ def get_sentence_words(sentences, terms):
 
     return sentence_words_list, sentence_ne_list
 
-
 def count_term(term, sentences, term_ne, ne_counts, ne_sentence_counts, term_pos_counts, term_pos_sentence_counts):
     if ' ' in term:
         return count_multi_word_term(term, sentences)
@@ -122,7 +121,7 @@ def count_single_word_term(term, term_ne, ne_counts, ne_sentence_counts, term_po
     if (len(term_ne[term]) > 0):
         max_ne = max(term_ne[term], key=lambda ne:ne_counts[ne])
         max_ne_sentence_counts = ne_sentence_counts[max_ne]
-    
+
     if max_ne is None or ne_counts[max_ne] < term_pos_counts[(term, max_pos)]:
         return max_pos, term_pos_counts[(term, max_pos)], max_pos_sentence_counts
     return max_ne, ne_counts[max_ne], max_ne_sentence_counts
@@ -145,7 +144,7 @@ def get_excerpt(term_sentence_counts, title_sentence_counts, sentences):
             return sentences[i]
         if term_sentence_counts[i] > 0 and half_excerpt is None:
             half_excerpt = sentences[i]
-    return half_excerpt
+    return half_excerpt if half_excerpt is not None else ''
 
 
 def aggregate_ne_list(sentence_ne_list, terms):
@@ -164,7 +163,7 @@ def aggregate_ne_list(sentence_ne_list, terms):
             ne_words = [word.upper() for word in word_tokenize(ne)]
             for ne_word in ne_words:
                 if ne_word in terms:
-                    term_ne[term].add(ne)
+                    term_ne[ne_word].add(ne)
             processed_ne.add(ne)
     
     for ne in processed_ne:

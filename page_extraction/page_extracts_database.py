@@ -189,8 +189,6 @@ def clear_source_entries():
 def clear_title_count_excerpt(title):
     cur.execute("UPDATE page_extracts SET count=NULL, excerpt=NULL WHERE title=?", [title])
     con.commit()
-    cur.execute("VACUUM")
-    con.commit()
 
 
 def clear_count_excerpt():
@@ -204,6 +202,11 @@ def clear():
     cur.execute("DELETE from page_extracts")
     con.commit()
     cur.execute("VACUUM")
+    con.commit()
+
+
+def clear_zero_counts():
+    cur.execute("UPDATE page_extracts SET count=NULL, excerpt=NULL WHERE count=0;")
     con.commit()
 
 
