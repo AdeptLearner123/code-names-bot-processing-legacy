@@ -22,7 +22,7 @@ def count_terms_multi(page_title, terms, text):
     sentences = get_sentences(text)
     sentence_words_list, sentence_ne_list = get_sentence_words(sentences, terms)
 
-    target_terms = [page_title.upper()] + terms
+    target_terms = [page_title.upper()] + list(terms)
     term_ne, ne_counts, ne_sentence_counts = aggregate_ne_list(sentence_ne_list, target_terms)
     term_pos_counts, term_pos_sentence_counts = aggregate_word_list(sentence_words_list, target_terms)
 

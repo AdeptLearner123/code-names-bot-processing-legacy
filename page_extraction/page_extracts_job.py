@@ -25,19 +25,14 @@ def job():
     print("Getting pages {0}".format(len(title_words)))
 
     with tqdm(total=len(title_words)) as pbar:
-        crawl_counter = 0
         for title in title_words:
-            if crawl_counter > 100:
-                break
             text = page_downloads_database.get_content(title)
             if text is None:
                 continue
             counts, excerpts = page_extractor.count_terms_multi(title, title_words[title], text)
-            crawl_counter += 1
             for word in title_words[title]:
                 page_extracts_database.insert_count_excerpt(word, title, counts[word], excerpts[word])
             page_extracts_database.commit()
             pbar.update(1)
 
     print("--- %s seconds ---" % (time.time() - start_time))
-    print("Crawled articles: {0}".format(crawl_counter))
