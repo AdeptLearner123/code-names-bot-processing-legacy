@@ -20,7 +20,7 @@ def output_scores(term, id_to_title):
     get_link_page_scores(term, paths, scores, id_to_title)
     get_source_page_scores(term, paths, scores, id_to_title)
 
-    print("Inserting: " + str(len(scores)))
+    print("Inserting: {0}".format(len(scores)))
     with tqdm(total=len(scores)) as pbar:
         for clue in scores:
             scores_database.insert_term_clue(term, clue, scores[clue], paths[clue])
