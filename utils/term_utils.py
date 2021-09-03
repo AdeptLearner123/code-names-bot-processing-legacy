@@ -67,7 +67,7 @@ def get_sources(term):
 
 
 def get_source_ids(term):
-    sources = get_term_sources(term)
+    sources = get_sources(term)
     return wiki_database.get_ids_set(sources)
 
 
