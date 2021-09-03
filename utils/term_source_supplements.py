@@ -30,7 +30,7 @@ SOURCE_SUPPLEMENTS = {
     "EUROPE": ["Europe"],
 
     "GRACE": ["Divine_grace"],
-    "GRASS": ["Grass"],
+    "GRASS": ["Poaceae"],
     "GROUND": ["Soil"],
 
     "HIMALAYAS": ["Himalayas"],
@@ -60,7 +60,7 @@ SOURCE_SUPPLEMENTS = {
     "PIE": ["Pi"],
     "PIT": ["Orchestra_pit", "Ball_pit"],
     "PLANE": ["Airplane"],
-    "POLE": ["Utility_pole", "Fireman's_pole"],
+    "POLE": ["Utility_pole"],
     "POOL": ["Swimming_pool"],
     "POST": ["Mail", "POST_(HTTP)"],
 

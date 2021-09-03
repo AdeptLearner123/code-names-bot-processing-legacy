@@ -12,8 +12,14 @@ def test_synonyms():
 
 def test_term_sources():
     for term in term_utils.get_terms():
-        source_titles = term_utils.get_term_sources(term)
-        print("{0}: {1}".format(term, source_titles))
+        sources = term_utils.get_term_sources(term)
+        for source in sources:
+            if not wiki_database.title_exists(source):
+                print("Title doesn't exist: {0}".format(source))
+                continue
+            source_id = wiki_database.title_to_id(source)
+            if wiki_database.get_redirect(source_id) is not None:
+                print("Redirected: {0}->{1}".format(source, wiki_database.get_redirected_title(source)))
 
 
 def test_disambiguation_titles():
@@ -29,12 +35,3 @@ def get_unprocessed_terms():
         source_titles = list(filter(lambda title:not has_suffix(title), source_titles))
         if len(source_titles) == 0 and term not in SOURCE_SUPPLEMENTS:
             print(term)
-
-"""
-def test_term_sources():
-    for term in TERM_PAGES:
-        source_titles = term_utils.get_term_sources(term)
-        expected = set(TERM_PAGES[term])
-        expected = wiki_database.get_titles_set(wiki_database.get_redirected_ids(wiki_database.get_ids_set(expected)))
-        print("{0}: {1}".format(term, expected.difference(source_titles)))
-"""

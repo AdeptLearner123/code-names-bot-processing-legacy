@@ -48,15 +48,3 @@ def extract_title_words(title):
             cleaned_title_words.append(cleaned_word)
     
     return list(map(lambda x:x.upper(), cleaned_title_words))
-
-
-def extract_title_clues(title, term):
-    lower_term = term.lower()
-    words = extract_title_words(title)
-    stemmer = PorterStemmer()
-    filtered_words = []
-    for word in words:
-        if word == lower_term or stemmer.stem(word) == lower_term:
-            continue
-        filtered_words.append(word)
-    return filtered_words

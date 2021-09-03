@@ -89,9 +89,3 @@ def get_synonyms(term):
     if term in SYNONYMS:
         synonyms.extend(SYNONYMS[term])
     return synonyms
-
-
-def get_synonyms_without_term(term):
-    if term in SYNONYMS:
-        return SYNONYMS[term]
-    return []

@@ -23,13 +23,6 @@ def get_terms():
     return TERMS
 
 
-def get_term_to_id():
-    term_to_id = dict()
-    for i in range(len(TERMS)):
-        term_to_id[TERMS[i]] = i
-    return term_to_id
-
-
 def validate_source_title(page_id, title, term):
     title_lower = title.lower()
     if 'disambiguation' in title_lower or 'list' in title_lower:
@@ -64,13 +57,18 @@ def get_disambiguation_sources(term):
     return source_titles
 
 
-def get_term_sources(term):
+def get_sources(term):
     sources = set()
     if term in SOURCE_SUPPLEMENTS:
         sources.update(set(SOURCE_SUPPLEMENTS[term]))
     if term not in IGNORE_DISMAMBIGUATION:
         sources.update(get_disambiguation_sources(term))
     return sources
+
+
+def get_source_ids(term):
+    sources = get_term_sources(term)
+    return wiki_database.get_ids_set(sources)
 
 
 def get_disambiguation_title(term):
@@ -85,6 +83,11 @@ def get_all_sources():
     for term in get_terms():
         sources.update(get_disambiguation_sources(term))
     return sources
+
+
+def get_all_source_ids():
+    sources = get_all_sources()
+    return wiki_database.get_ids_set(sources)
 
 
 def get_word_tag_to_pos():

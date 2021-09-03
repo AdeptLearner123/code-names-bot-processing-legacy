@@ -27,7 +27,7 @@ def play(seed):
     #red = ["PART", "SNOW", "EUROPE", "AGENT", "NINJA", "BUCK", "ARM", "CENTER", "TRUNK"]
     #black = ["PANTS"]
     #blank = ["ANGEL", "POUND", "PIANO", "PIN", "ALPS", "MAMMOTH", "OCTOPUS"]
-    #blue = ["PYRAMID", "CENTER", "SQUARE"]
+    #blue = ["OCTOPUS", "LION", "MAMMOTH"]
     #red = []
     #black = []
     #blank = []
