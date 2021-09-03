@@ -11,7 +11,10 @@ nlp = spacy.load("en_core_web_sm")
 from utils.nlp_utils import get_ne_chunks
 from pyinflect import getAllInflections
 
+from utils import term_utils
+
 VALID_POS = set(["VB", "NN", "JJ"])
+WORD_TAG_TO_TERM_POS = term_utils.get_word_tag_to_pos()
 
 def count_terms(page_title, target_term, text):
     term_counts, excerpts = count_terms_multi(page_title, [target_term], text)
@@ -178,20 +181,7 @@ def aggregate_ne_list(sentence_ne_list, terms):
 
 
 def aggregate_word_list(sentence_word_list, terms):
-    word_tag_to_term_pos = {}
-    for term in terms:
-        inflections = getAllInflections(term)
-        for pos in inflections:
-            inflected_term = inflections[pos][0].upper()
-            word_tag_to_term_pos[(inflected_term, pos)] = (term, pos[0:2])
-
-    sentence_term_pos_list = []
-    for word_list in sentence_word_list:
-        term_pos_list = []
-        for word_tag in word_list:
-            if word_tag in word_tag_to_term_pos:
-                term_pos_list.append(word_tag_to_term_pos[word_tag])
-        sentence_term_pos_list.append(term_pos_list)
+    sentence_term_pos_list = get_sentence_term_pos_list(sentence_word_list)
 
     term_pos_counts = {}
     term_pos_sentence_counts = {}
@@ -201,8 +191,23 @@ def aggregate_word_list(sentence_word_list, terms):
             term_pos_counts[(term, pos)] = 0
             term_pos_sentence_counts[(term, pos)] = []
             for term_pos_list in sentence_term_pos_list:
-                count = term_pos_list.count((term, pos))
+                count = term_pos_list_count(term_pos_list, term, pos)
                 term_pos_counts[(term, pos)] += count
                 term_pos_sentence_counts[(term, pos)].append(count)
 
     return term_pos_counts, term_pos_sentence_counts
+
+
+def get_sentence_term_pos_list(sentence_word_list):
+    sentence_term_pos_list = []
+    for word_list in sentence_word_list:
+        term_pos_list = []
+        for word_tag in word_list:
+            if word_tag in WORD_TAG_TO_TERM_POS:
+                term_pos_list.append(WORD_TAG_TO_TERM_POS[word_tag])
+        sentence_term_pos_list.append(term_pos_list)
+    return sentence_term_pos_list
+
+
+def term_pos_list_count(term_pos_list, term, pos):
+    return term_pos_list.count((term, pos))

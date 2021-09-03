@@ -1,16 +1,18 @@
+from re import S
 from sqlite3.dbapi2 import TimeFromTicks
 import spacy
 nlp = spacy.load("en_core_web_sm")
-import progressbar
+from tqdm import tqdm
 import time
 
-from utils.term_pages import TERM_PAGES
 from utils import wiki_database
 from utils.title_utils import extract_title_words
 from page_extraction import page_extractor
 from page_extraction import page_extracts_database
 from page_downloads import page_downloads_database
+from page_downloads import page_downloader
 from nltk.stem import WordNetLemmatizer
+from utils import term_utils
 
 def get_source_page_counts(title):
     page_id = wiki_database.title_to_id(title)
@@ -19,8 +21,6 @@ def get_source_page_counts(title):
     id = wiki_database.title_to_id(title)
     link_ids = wiki_database.fetch_outgoing_links_set([id])
     words = page_ids_to_words(link_ids)
-
-    print("Words: {0}".format(len(words)))
 
     text = page_downloads_database.get_content(title)
     noun_counts, noun_chunks, noun_excerpts = page_extractor.extract_noun_chunks(text)
@@ -47,7 +47,7 @@ def page_ids_to_words(ids):
 def get_counts(term):
     noun_counts = {}
     noun_excerpts = {}
-    for title in TERM_PAGES[term]:
+    for title in term_utils.get_disambiguation_sources(term):
         title_noun_counts, title_word_excerpts = get_source_page_counts(title)
         for noun in title_noun_counts:
             if noun not in noun_counts or noun_counts[noun] < title_noun_counts[noun]:
@@ -58,16 +58,17 @@ def get_counts(term):
 
 def job():
     start_time = time.time()
-    bar = progressbar.ProgressBar(maxval=len(TERM_PAGES), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    i = 0
-    bar.start()
-    for term in TERM_PAGES:
-        for title in TERM_PAGES[term]:
-            title_noun_counts, title_word_excerpts = get_source_page_counts(title)
-            for noun in title_noun_counts:
-                page_extracts_database.insert_term_page_count_excerpt(term, noun.upper(), title, title_noun_counts[noun], title_word_excerpts[noun], True)
-            page_extracts_database.commit()
-        i += 1
-        bar.update(i)
-    bar.finish()
+
+    all_sources = term_utils.get_all_sources()
+    page_downloader.download_multi_threaded(all_sources)
+    
+    with tqdm(total=len(all_sources)) as pbar:
+        for term in term_utils.get_terms():
+            for title in term_utils.get_disambiguation_sources(term):
+                title_noun_counts, title_word_excerpts = get_source_page_counts(title)
+                for noun in title_noun_counts:
+                    page_extracts_database.insert_term_page_count_excerpt(term, noun.upper(), title, title_noun_counts[noun], title_word_excerpts[noun], True)
+                page_extracts_database.commit()
+                pbar.update(1)
+
     print("--- %s seconds ---" % (time.time() - start_time))

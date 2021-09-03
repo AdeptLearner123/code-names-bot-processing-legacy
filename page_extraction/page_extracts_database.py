@@ -1,4 +1,8 @@
+from tqdm import tqdm
 import sqlite3
+
+from utils import wiki_database
+from utils import term_utils
 
 con = sqlite3.connect('page_extraction/page_extracts.sqlite')
 cur = con.cursor()
@@ -7,29 +11,29 @@ def setup():
     cur.execute(
         """
             CREATE TABLE IF NOT EXISTS page_extracts (
-                term TEXT NOT NULL,
+                term_id INT NOT NULL,
                 word TEXT NOT NULL,
-                title TEXT NOT NULL,
-                count REAL DEFAULT NULL,
+                page_id INT NOT NULL,
+                count INT DEFAULT NULL,
                 excerpt TEXT DEFAULT NULL,
                 is_source BIT NOT NULL,
-                CONSTRAINT term_word_title_unique UNIQUE (term, word, title)
+                CONSTRAINT term_word_title_unique UNIQUE (term_id, word, page_id)
             );
         """
     )
     cur.execute(
         """
-            CREATE INDEX IF NOT EXISTS term_title_index ON page_extracts (term, title);
+            CREATE INDEX IF NOT EXISTS term_page_index ON page_extracts (term_id, page_id);
         """
     )
     cur.execute(
         """
-            CREATE INDEX IF NOT EXISTS title_word_index ON page_extracts (title, word);
+            CREATE INDEX IF NOT EXISTS page_word_index ON page_extracts (page_id, word);
         """
     )
     cur.execute(
         """
-            CREATE INDEX IF NOT EXISTS term_index ON page_extracts (term);
+            CREATE INDEX IF NOT EXISTS term_index ON page_extracts (term_id);
         """
     )
 
@@ -97,6 +101,9 @@ def get_empty_entries():
     cur.execute("SELECT word, title FROM page_extracts WHERE count IS NULL OR excerpt IS NULL")
     return cur.fetchall()
 
+def get_non_empty_entries(limit):
+    cur.execute("SELECT word, title, count, excerpt FROM page_extracts WHERE count IS NOT NULL AND excerpt IS NOT NULL LIMIT ?", [limit])
+    return cur.fetchall()
 
 def get_entries():
     cur.execute("SELECT word, title FROM page_extracts")
@@ -216,3 +223,20 @@ def filter_term_titles(term, titles):
     con.commit()
     cur.execute("VACUUM")
     con.commit()
+
+
+def transfer():
+    print("Transferring")
+    con2 = sqlite3.connect('page_extraction/page_extracts CURRENT.sqlite')
+    cur2 = con2.cursor()
+    cur2.execute("SELECT term, word, title FROM page_extracts WHERE is_source=0")
+    rows = cur2.fetchall()
+    print("Found ", len(rows))
+    term_to_id = term_utils.get_term_to_id()
+    with tqdm(total=len(rows)) as pbar:
+        for term, word, title in rows:
+            page_id = wiki_database.title_to_id(title)
+            term_id = term_to_id[term]
+            cur.execute("INSERT INTO page_extracts (term_id, word, page_id, is_source) VALUES (?, ?, ?, ?);", [term_id, word, page_id, 0])
+            pbar.update(1)
+        con.commit()

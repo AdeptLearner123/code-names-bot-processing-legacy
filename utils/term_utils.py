@@ -7,6 +7,7 @@ from utils.title_utils import get_suffix
 from utils import wiki_database
 from utils.term_synonyms import get_synonyms
 from utils.term_source_supplements import SOURCE_SUPPLEMENTS
+from pyinflect import getAllInflections
 
 TITLE_OVERRIDE = {
     "NEW YORK": "New_York",
@@ -20,6 +21,13 @@ TERMS = list(open('terms.txt', 'r').read().splitlines())
 
 def get_terms():
     return TERMS
+
+
+def get_term_to_id():
+    term_to_id = dict()
+    for i in range(len(TERMS)):
+        term_to_id[TERMS[i]] = i
+    return term_to_id
 
 
 def validate_source_title(page_id, title, term):
@@ -44,6 +52,8 @@ def validate_source_title(page_id, title, term):
 
 
 def get_disambiguation_sources(term):
+    if term in IGNORE_DISMAMBIGUATION:
+        return set()
     disambiguation_title = get_disambiguation_title(term)
     disambiguation_id = wiki_database.title_to_id(disambiguation_title)
     disambiguation_id = wiki_database.get_redirected_id(disambiguation_id)
@@ -68,3 +78,20 @@ def get_disambiguation_title(term):
         return None
     title = term.capitalize().replace(' ', '_') if term not in TITLE_OVERRIDE else TITLE_OVERRIDE[term]
     return "{0}_(disambiguation)".format(title)
+
+
+def get_all_sources():
+    sources = set()
+    for term in get_terms():
+        sources.update(get_disambiguation_sources(term))
+    return sources
+
+
+def get_word_tag_to_pos():
+    word_tag_to_term_pos = {}
+    for term in get_terms():
+        inflections = getAllInflections(term)
+        for pos in inflections:
+            inflected_term = inflections[pos][0].upper()
+            word_tag_to_term_pos[(inflected_term, pos)] = (term, pos[0:2])
+    return word_tag_to_term_pos
