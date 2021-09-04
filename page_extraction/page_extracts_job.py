@@ -31,7 +31,7 @@ def job():
     print("--- %s seconds ---" % (time.time() - start_time))
 
 
-def get_empty_pages(empty_entries):
+def get_empty_pages():
     empty_entries = page_extracts_database.get_empty_entries()
     page_words = {}
     for word, page_id in empty_entries:

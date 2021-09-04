@@ -32,7 +32,7 @@ def insert_page(page_id, content):
     cur.execute("SELECT page_id FROM page_downloads WHERE page_id=?;", [page_id])
     if cur.fetchone() is not None:
         cur.execute("UPDATE page_downloads SET content=? WHERE page_id=?;", [content, page_id])
-    cur.execute("INSERT INTO page_downloads (page_id, content) VALUES (?, ?, ?);", [page_id, content])
+    cur.execute("INSERT INTO page_downloads (page_id, content) VALUES (?, ?);", [page_id, content])
 
 
 def commit():

@@ -21,11 +21,10 @@ def setup():
             );
         """
     )
-    cur.execute(
-        """
-            CREATE INDEX IF NOT EXISTS term_page_index ON page_extracts (term, page_id);
-        """
-    )
+    create_indexes()
+
+
+def create_indexes():
     cur.execute(
         """
             CREATE INDEX IF NOT EXISTS page_word_index ON page_extracts (page_id, word);
@@ -39,10 +38,7 @@ def setup():
 
 
 def insert_term_page(term, word, page_id, is_source=False):
-    cur.execute("SELECT * FROM page_extracts WHERE term=? AND word=? AND page_id=?;", [term, word, page_id])
-    if cur.fetchone() is not None:
-        return
-    cur.execute("INSERT INTO page_extracts (term, word, page_id, is_source) VALUES (?, ?, ?, ?)", [term, word, page_id, is_source])
+    cur.execute("INSERT OR IGNORE INTO page_extracts (term, word, page_id, is_source) VALUES (?, ?, ?, ?)", [term, word, page_id, is_source])
 
 
 def update_count_excerpt(word, page_id, count, excerpt):

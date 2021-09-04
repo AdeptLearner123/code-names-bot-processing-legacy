@@ -23,6 +23,8 @@ def download_multi(target_ids, size = None):
     if size is not None:
         filtered_ids = filtered_ids[:size]
 
+    #filtered_ids = filtered_ids[:100]
+    #print(filtered_ids)
     chunk_size = 1000
     total_failed = 0
     with tqdm(total=len(filtered_ids)) as pbar:

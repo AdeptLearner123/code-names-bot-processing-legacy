@@ -1,5 +1,5 @@
 import sqlite3
-import progressbar
+from tqdm import tqdm
 
 con = sqlite3.connect('utils/wiki.sqlite')
 cur = con.cursor()
@@ -94,13 +94,11 @@ def get_all_titles_dict():
     id_to_title = {}
     cur.execute("SELECT id, title FROM pages;")
     rows = cur.fetchall()
-    bar = progressbar.ProgressBar(maxval=len(rows), widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-    bar.start()
-    for i in range(len(rows)):
-        bar.update(i)
-        row = rows[i]
-        id_to_title[row[0]] = row[1]
-    bar.finish()
+    with tqdm(total=len(rows)) as pbar:
+        for i in range(len(rows)):
+            row = rows[i]
+            id_to_title[row[0]] = row[1]
+            pbar.update(1)
     return id_to_title
 
 
