@@ -180,6 +180,24 @@ def fetch_links_set(page_ids, outgoing, incoming):
     return link_ids
 
 
+def fetch_all_outgoing_links():
+    links = dict()
+    with tqdm(total=get_link_count()) as pbar:
+        cur.execute("SELECT id, outgoing_links FROM links;")
+        row = cur.fetchone()
+        while row is not None:
+            id, outgoing_links = row
+            links[id] = set(map(lambda link:int(link), filter(lambda link:link != '', outgoing_links.split('|'))))
+            row = cur.fetchone()
+            pbar.update(1)
+    return links
+
+
+def get_link_count():
+    cur.execute("SELECT COUNT(*) FROM links;")
+    return cur.fetchone()[0]
+
+
 def get_redirect(id):
     cur.execute("SELECT target_id FROM redirects WHERE source_id=?", [id])
     row = cur.fetchone()
