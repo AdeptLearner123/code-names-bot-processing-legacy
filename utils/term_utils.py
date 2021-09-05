@@ -81,7 +81,7 @@ def get_disambiguation_title(term):
 def get_all_sources():
     sources = set()
     for term in get_terms():
-        sources.update(get_disambiguation_sources(term))
+        sources.update(get_sources(term))
     return sources
 
 

@@ -21,20 +21,16 @@ def setup():
             );
         """
     )
-    create_indexes()
 
 
 def create_indexes():
-    cur.execute(
-        """
-            CREATE INDEX IF NOT EXISTS page_word_index ON page_extracts (page_id, word);
-        """
-    )
-    cur.execute(
-        """
-            CREATE INDEX IF NOT EXISTS term_index ON page_extracts (term);
-        """
-    )
+    cur.execute("CREATE INDEX IF NOT EXISTS page_word_index ON page_extracts (page_id, word);")
+    cur.execute("CREATE INDEX IF NOT EXISTS term_index ON page_extracts (term);")
+
+
+def drop_indexes():
+    cur.execute("DROP INDEX IF EXISTS page_word_index")
+    cur.execute("DROP INDEX IF EXISTS term_index")
 
 
 def insert_term_page(term, word, page_id, is_source=False):
@@ -101,6 +97,12 @@ def get_extract(word, page_id):
 def get_term_page_counts(term, is_source):
     cur.execute("SELECT word, page_id, count FROM page_extracts WHERE is_source=? AND term=?", [is_source, term])
     return cur.fetchall()
+
+
+def clear_source_entries():
+    cur.execute("DELETE FROM page_extracts WHERE is_source=1")
+    con.commit()
+    cur.execute("VACUUM")
 
 
 def clear_count_excerpt():

@@ -5,6 +5,12 @@ from page_extraction import page_extractor
 from page_downloads import page_downloader
 from page_downloads import page_downloads_database
 from tqdm import tqdm
+from utils import wiki_database
+
+def download_job():
+    page_words = get_empty_pages()
+    page_downloader.download_multi(page_words.keys())
+
 
 def job():
     start_time = time.time()
@@ -15,14 +21,16 @@ def job():
     print("Ensuring pages are downloaded")
     page_downloader.download_multi(page_words.keys())
 
-    print("Getting pages {0}".format(len(page_words)))
+    id_to_title = wiki_database.get_all_titles_dict()
 
+    print("Getting pages {0}".format(len(page_words)))
     with tqdm(total=len(page_words)) as pbar:
         for page_id in page_words:
             text = page_downloads_database.get_content(page_id)
             if text is None:
                 continue
-            counts, excerpts = page_extractor.count_terms_multi(page_id, page_words[page_id], text)
+            page_title = id_to_title[page_id]
+            counts, excerpts = page_extractor.count_terms_multi(page_title, page_words[page_id], text)
             for word in page_words[page_id]:
                 page_extracts_database.update_count_excerpt(word, page_id, counts[word], excerpts[word])
             page_extracts_database.commit()

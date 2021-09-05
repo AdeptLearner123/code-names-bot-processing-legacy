@@ -12,6 +12,7 @@ from utils.nlp_utils import get_ne_chunks
 from pyinflect import getAllInflections
 
 from utils import term_utils
+from utils.title_utils import trim_suffix
 
 VALID_POS = set(["VB", "NN", "JJ"])
 WORD_TAG_TO_TERM_POS = term_utils.get_word_tag_to_pos()
@@ -22,6 +23,8 @@ def count_terms(page_title, target_term, text):
 
 
 def count_terms_multi(page_title, terms, text):
+    page_title = trim_suffix(page_title)
+    
     sentences = get_sentences(text)
     sentence_words_list, sentence_ne_list = get_sentence_words(sentences, terms)
 

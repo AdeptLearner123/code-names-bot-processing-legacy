@@ -2,17 +2,15 @@ from socket import timeout
 import requests
 from urllib.request import urlopen
 import json
-from urllib import parse
-import progressbar
 import time
-import sys
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from page_downloads import page_downloads_database
 
 
-WIKIPEDIA_API_URL = 'https://en.wikipedia.org/w/api.php'
+#WIKIPEDIA_API_URL = 'https://en.wikipedia.org/w/api.php'
+URL_PREFIX = 'https://en.wikipedia.org/w/api.php?action=query&format=json&prop=extracts&pageids='
 
 def download_multi(target_ids, size = None):
     start_time = time.time()
@@ -23,8 +21,6 @@ def download_multi(target_ids, size = None):
     if size is not None:
         filtered_ids = filtered_ids[:size]
 
-    #filtered_ids = filtered_ids[:100]
-    #print(filtered_ids)
     chunk_size = 1000
     total_failed = 0
     with tqdm(total=len(filtered_ids)) as pbar:
@@ -57,16 +53,20 @@ def download_save_text(page_id, failed, results):
 
 
 def download_text(page_id):
-    query_params = {
-        'action': 'query',
-        'format': 'json',
-        'prop': 'extracts',
-        'pageids': page_id
-    }
+    #query_params = {
+    #    'action': 'query',
+    #    'format': 'json',
+    #    'prop': 'extracts',
+    #    'pageids': page_id
+    #}
 
     try:
-        response = requests.get(WIKIPEDIA_API_URL, params=query_params)
-        return response.json().get('query', {}).get('pages', {}).get(str(page_id), {}).get('extract', None)
+        url = URL_PREFIX + str(page_id)
+        response = urlopen(url, timeout=10)
+        response = json.loads(response.read())
+        return response.get('query', {}).get('pages', {}).get(str(page_id), {}).get('extract', None)
+        #response = requests.get(WIKIPEDIA_API_URL, params=query_params, timeout=6)
+        #return response.json().get('query', {}).get('pages', {}).get(str(page_id), {}).get('extract', None)
     except timeout:
         return None
     except:

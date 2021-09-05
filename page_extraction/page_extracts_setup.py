@@ -72,11 +72,13 @@ def get_pair_links(term_links):
 
 
 def insert_pages(target_links, term_links):
+    page_extracts_database.drop_indexes()
     with tqdm(total=len(target_links)) as pbar:
         for link in target_links:
             insert_page(link, term_links)
             pbar.update(1)
     page_extracts_database.commit()
+    page_extracts_database.create_indexes()
 
 
 def insert_page(page_id, term_links):

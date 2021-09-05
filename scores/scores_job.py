@@ -1,8 +1,6 @@
 from utils.term_synonyms import get_synonyms
 from tqdm import tqdm
 import time
-from nltk.stem.porter import *
-from nltk.stem import WordNetLemmatizer
 
 from utils import wiki_database
 from page_extraction import page_extracts_database
@@ -23,7 +21,8 @@ def output_scores(term, id_to_title):
     print("Inserting: {0}".format(len(scores)))
     with tqdm(total=len(scores)) as pbar:
         for clue in scores:
-            scores_database.insert_term_clue(term, clue, scores[clue], paths[clue])
+            if term not in clue:
+                scores_database.insert_term_clue(term, clue, scores[clue], paths[clue])
             pbar.update(1)
     scores_database.commit()
 
@@ -47,24 +46,21 @@ def get_link_page_scores(term, paths, scores, id_to_title):
         if page_id not in page_counts or page_counts[page_id] < count:
             page_counts[page_id] = count
     
-    print("Count: {0}".format(count))
-    with tqdm(total=len(page_counts)) as pbar:
-        for page_id in page_counts:
-            term_count = page_counts[page_id]
-            if term_count == 0:
-                continue
+    print("Count: {0}".format(len(page_counts)))
+    for page_id in page_counts:
+        term_count = page_counts[page_id]
+        if term_count == 0:
+            continue
 
-            title = id_to_title[page_id]
-            title_words = extract_title_words(title, term)
-            if len(title_words) > 0:
-                continue
+        title = id_to_title[page_id]
+        title_words = extract_title_words(title)
+        if len(title_words) != 1:
+            continue
 
-            score = 1 - 0.7 ** term_count
-            clue = title_words[0]
-            scores[clue] = score
-            paths[clue] = title
-
-            pbar.update(1)
+        score = 1 - 0.7 ** term_count
+        clue = title_words[0]
+        scores[clue] = score
+        paths[clue] = title
 
 
 def get_source_page_scores(term, paths, scores, id_to_title):

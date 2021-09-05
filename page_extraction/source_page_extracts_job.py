@@ -1,5 +1,3 @@
-from re import S
-from sqlite3.dbapi2 import TimeFromTicks
 from tqdm import tqdm
 import time
 
@@ -11,12 +9,14 @@ from page_downloads import page_downloads_database
 from page_downloads import page_downloader
 from utils import term_utils
 
-def get_source_page_counts(title):
-    id = wiki_database.title_to_id(title)
+def get_source_page_counts(id):
+    title = wiki_database.id_to_title(id)
     link_ids = wiki_database.fetch_outgoing_links_set([id])
     words = page_ids_to_words(link_ids)
 
     text = page_downloads_database.get_content(id)
+    if text is None:
+        return None, None
     noun_counts, noun_chunks, noun_excerpts = page_extractor.extract_noun_chunks(text)
     word_counts = dict()
     word_excerpts = dict()
@@ -46,10 +46,12 @@ def job():
     
     with tqdm(total=len(all_source_ids)) as pbar:
         for term in term_utils.get_terms():
-            for title in term_utils.get_sources(term):
-                source_page_counts, source_page_excerpts = get_source_page_counts(title)
+            for id in term_utils.get_source_ids(term):
+                source_page_counts, source_page_excerpts = get_source_page_counts(id)
+                if source_page_counts is None:
+                    continue
                 for noun in source_page_counts:
-                    page_extracts_database.insert_term_page_count_excerpt(term, noun.upper(), title, source_page_counts[noun], source_page_excerpts[noun], True)
+                    page_extracts_database.insert_term_page_count_excerpt(term, noun.upper(), id, source_page_counts[noun], source_page_excerpts[noun], True)
                 page_extracts_database.commit()
                 pbar.update(1)
 
