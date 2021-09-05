@@ -2,6 +2,7 @@ from utils.term_pages import TERM_PAGES
 from scores import scores_database
 from page_extraction import page_extracts_database
 from utils.term_synonyms import SYNONYMS, get_synonyms
+from utils import wiki_database
 
 NEGATIVE_THRESHOLD = 2.0
 
@@ -70,11 +71,11 @@ def print_clue_term(term, clue, show_extracts=False):
         if show_extracts:
             is_source = end_title in TERM_PAGES[term]
             if is_source:
-                term_count, extract = page_extracts_database.get_extract(clue, end_title)
+                term_count, extract = page_extracts_database.get_extract(clue, wiki_database.title_to_id(end_title))
                 print("      {0}: Count: {1}   Extract: {2}".format(clue, term_count, extract))
             else:
                 for synonym in get_synonyms(term):
-                    term_count, extract = page_extracts_database.get_extract(synonym, end_title)
+                    term_count, extract = page_extracts_database.get_extract(synonym, wiki_database.title_to_id(end_title))
                     print("      {0}: Count: {1}   Extract: {2}".format(synonym, term_count, extract))
 
 
