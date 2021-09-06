@@ -17,6 +17,12 @@ def setup():
     )
 
 
+def clear():
+    cur.execute("DELETE FROM pageranks;")
+    con.commit()
+    cur.execute("VACUUM")
+
+
 def create_index():
     cur.execute(
         """
@@ -30,6 +36,7 @@ def delete_index():
 
 
 def insert_pageranks(scores):
+    clear()
     delete_index()
     for page_id in tqdm(scores):
         cur.execute("INSERT OR IGNORE INTO pageranks (page_id, pagerank) VALUES (?, ?)", [page_id, scores[page_id]])
@@ -40,3 +47,11 @@ def insert_pageranks(scores):
 def get_pagerank(page_id):
     cur.execute("SELECT pagerank FROM pageranks WHERE page_id=?", [page_id])
     return cur.fetchone()[0]
+
+
+def get_pageranks():
+    scores = dict()
+    cur.execute("SELECT page_id, pagerank FROM pageranks;")
+    for page_id, pagerank in tqdm(cur.fetchall()):
+        scores[page_id] = pagerank
+    return scores
