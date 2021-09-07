@@ -24,17 +24,15 @@ def job():
     id_to_title = wiki_database.get_all_titles_dict()
 
     print("Getting pages {0}".format(len(page_words)))
-    with tqdm(total=len(page_words)) as pbar:
-        for page_id in page_words:
-            text = page_downloads_database.get_content(page_id)
-            if text is None:
-                continue
-            page_title = id_to_title[page_id]
-            counts, excerpts = page_extractor.count_terms_multi(page_title, page_words[page_id], text)
-            for word in page_words[page_id]:
-                page_extracts_database.update_count_excerpt(word, page_id, counts[word], excerpts[word])
-            page_extracts_database.commit()
-            pbar.update(1)
+    for page_id in tqdm(page_words):
+        text = page_downloads_database.get_content(page_id)
+        if text is None:
+            continue
+        page_title = id_to_title[page_id]
+        counts, excerpts = page_extractor.count_terms_multi(page_title, page_words[page_id], text)
+        for word in page_words[page_id]:
+            page_extracts_database.update_count_excerpt(word, page_id, counts[word], excerpts[word])
+        page_extracts_database.commit()
 
     print("--- %s seconds ---" % (time.time() - start_time))
 

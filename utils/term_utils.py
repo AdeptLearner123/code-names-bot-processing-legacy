@@ -93,8 +93,9 @@ def get_all_source_ids():
 def get_word_tag_to_pos():
     word_tag_to_term_pos = {}
     for term in get_terms():
-        inflections = getAllInflections(term)
-        for pos in inflections:
-            inflected_term = inflections[pos][0].upper()
-            word_tag_to_term_pos[(inflected_term, pos)] = (term, pos[0:2])
+        for synonym in get_synonyms(term):
+            inflections = getAllInflections(synonym)
+            for pos in inflections:
+                inflected_term = inflections[pos][0].upper()
+                word_tag_to_term_pos[(inflected_term, pos)] = (synonym, pos[0:2])
     return word_tag_to_term_pos

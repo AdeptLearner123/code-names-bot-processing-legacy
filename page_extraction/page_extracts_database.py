@@ -90,6 +90,7 @@ def get_extract(word, page_id):
     cur.execute("SELECT count, excerpt FROM page_extracts WHERE word=? AND page_id=?", [word, page_id])
     row = cur.fetchone()
     if row is None:
+        print("Row is none")
         return None, None
     return row[0], row[1]
 
@@ -109,13 +110,16 @@ def clear_count_excerpt():
     cur.execute("UPDATE page_extracts SET count=NULL, excerpt=NULL;")
     con.commit()
     cur.execute("VACUUM")
-    con.commit()
 
 
 def clear():
     cur.execute("DELETE from page_extracts")
     con.commit()
     cur.execute("VACUUM")
+
+
+def clear_word(term, word):
+    cur.execute("UPDATE page_extracts SET count=NULL, excerpt=NULL WHERE term=? AND word=?;", [term, word])
     con.commit()
 
 

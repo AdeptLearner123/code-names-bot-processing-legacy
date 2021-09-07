@@ -94,11 +94,8 @@ def get_all_titles_dict():
     id_to_title = {}
     cur.execute("SELECT id, title FROM pages;")
     rows = cur.fetchall()
-    with tqdm(total=len(rows)) as pbar:
-        for i in range(len(rows)):
-            row = rows[i]
-            id_to_title[row[0]] = row[1]
-            pbar.update(1)
+    for row in tqdm(rows):
+        id_to_title[row[0]] = row[1]
     return id_to_title
 
 

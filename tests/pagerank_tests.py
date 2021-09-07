@@ -16,6 +16,6 @@ def test_pagerank():
 
 
 def test_pagerank_scores():
-    titles = ['Triceratops', 'DNA_(BTS_song)', 'Belt_(clothing)', "Pinhead_(Hellraiser)"]
+    titles = ['Bivalvia', 'Chimera_(genetics)', 'Chimera_(mythology)', 'Chimera_(Russian_band)', 'Triceratops', 'STS-132', 'Russia', 'Atmosphere_(music_group)', 'Narrative', 'Pinhead_(Hellraiser)', 'Earth', 'Banknote', 'Electrolite', 'Reggae', 'DNA_(BTS_song)', 'Bilbao', 'Bar', 'Day', 'Belt_(clothing)', 'Twilight', 'Eagle_(heraldry)']
     for title in titles:
         print("{0}: {1}".format(title, pagerank_database.get_pagerank(wiki_database.title_to_id(title))))
