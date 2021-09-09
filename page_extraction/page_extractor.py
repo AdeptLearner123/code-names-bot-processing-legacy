@@ -14,8 +14,9 @@ from pyinflect import getAllInflections
 from utils import term_utils
 from utils.title_utils import trim_suffix
 
-VALID_POS = set(["VB", "NN", "JJ"])
+VALID_POS = {"VB", "NN", "JJ"}
 WORD_TAG_TO_TERM_POS = term_utils.get_word_tag_to_pos()
+NUMBERS = {"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
 
 def count_terms(page_title, target_term, text):
     term_counts, excerpts = count_terms_multi(page_title, [target_term], text)
@@ -58,7 +59,7 @@ def extract_noun_chunks(text):
         for chunk in doc.noun_chunks:
             nc = chunk.text.lower()
             root = lemmatizer.lemmatize(chunk.root.text).upper()
-            if re.compile(r'[0-9]').search(nc):
+            if noun_chunk_has_number(nc):
                 continue
             if root not in root_counts:
                 root_counts[root] = 1
@@ -70,6 +71,14 @@ def extract_noun_chunks(text):
                 root_excerpts[root].append(sentence)
     return root_counts, root_chunks, root_excerpts
 
+
+def noun_chunk_has_number(noun_chunk):
+        if re.compile(r'[0-9]').search(noun_chunk):
+            return True
+        for word in noun_chunk.split(' '):
+            if word.lower() in NUMBERS:
+                return True
+        return False
 
 def get_sentences(html):
     text = format_text(html)

@@ -9,10 +9,10 @@ from page_downloads import page_downloads_database
 from page_downloads import page_downloader
 from utils import term_utils
 
-def get_source_page_counts(id):
+def get_source_page_counts(id, title_to_id, pageranks):
     title = wiki_database.id_to_title(id)
-    link_ids = wiki_database.fetch_outgoing_links_set([id])
-    words = page_ids_to_words(link_ids)
+    link_ids = wiki_database.fetch_all_links_set([id])
+    words = page_ids_to_words(link_ids, title, title_to_id, pageranks)
 
     text = page_downloads_database.get_content(id)
     if text is None:
@@ -29,11 +29,14 @@ def get_source_page_counts(id):
     return word_counts, word_excerpts
 
 
-def page_ids_to_words(ids):
-    titles = wiki_database.get_titles_set(ids)
+def page_ids_to_words(ids, source_title, title_to_id, pageranks):
+    source_title_words = extract_title_words(source_title)
+    source_title_prefix = None if len(source_title_words) != 2 else source_title_words[0]
+    ids = filter(lambda id:pageranks[id] > 3, ids)
+    titles = set(map(lambda id:title_to_id[id], filter(lambda id:id in title_to_id, ids)))
     titles = map(lambda title:extract_title_words(title), titles)
-    titles = filter(lambda words:len(words) == 1, titles)
-    titles = map(lambda words:words[0], titles)
+    titles = filter(lambda words:len(words) == 1 or (len(words) == 2 and words[0] == source_title_prefix), titles)
+    titles = map(lambda words:words[-1], titles)
     titles = set(titles)
     return titles
 
@@ -43,7 +46,7 @@ def job():
 
     all_source_ids = term_utils.get_all_source_ids()
     page_downloader.download_multi(all_source_ids)
-    
+
     with tqdm(total=len(all_source_ids)) as pbar:
         for term in term_utils.get_terms():
             for id in term_utils.get_source_ids(term):

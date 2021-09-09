@@ -1,8 +1,7 @@
-from utils.term_pages import TERM_PAGES
 from scores import scores_database
 from page_extraction import page_extracts_database
 from utils.term_synonyms import SYNONYMS, get_synonyms
-from utils import wiki_database
+from utils import wiki_database, term_utils
 
 NEGATIVE_THRESHOLD = 2.0
 
@@ -69,7 +68,7 @@ def print_clue_term(term, clue, show_extracts=False):
         end_title = path.replace('<->', '|').replace('<-', '|').replace('->', '|').split('|')[-1]
         print("Term: {0} Score: {1} Path: {2}".format(term, score, path))
         if show_extracts:
-            is_source = end_title in TERM_PAGES[term]
+            is_source = end_title in term_utils.get_sources(term)
             if is_source:
                 term_count, extract = page_extracts_database.get_extract(clue, wiki_database.title_to_id(end_title))
                 print("      {0}: Count: {1}   Extract: {2}".format(clue, term_count, extract))
@@ -86,8 +85,3 @@ def explore_clue(clue, pos_terms, neg_terms, show_extracts=False):
     print("NEGATIVE")
     for term in neg_terms:
         print_clue_term(term, clue, show_extracts)
-
-#explore_clue_generator(['LION', 'OCTOPUS', 'DINOSAUR'], [])
-#explore_clue_generator(['PYRAMID', 'SQUARE', 'CENTER'], [])
-#explore_clue_generator(['SHADOW', 'NINJA', 'SPY'], [])
-#explore_clue_generator(['POUND', 'PART'], [])

@@ -36,8 +36,8 @@ def setup():
 def get_indexes():
     cur.execute(
         """
-            SELECT name 
-            FROM sqlite_master 
+            SELECT name
+            FROM sqlite_master
             WHERE type = 'index';
         """
     )
@@ -57,7 +57,7 @@ def title_to_id(title):
 def id_to_title(page_id):
     cur.execute("SELECT title FROM pages WHERE id=?;", [page_id])
     row = cur.fetchone()
-    return row[0]
+    return row[0] if row is not None else None
 
 
 def get_titles_set(page_ids):

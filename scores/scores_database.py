@@ -37,12 +37,12 @@ def commit():
 
 def get_top_clues(term, count, reverse=False):
     order_str = "ASC" if reverse else "DESC"
-    cur.execute("SELECT clue, score, path FROM term_clue WHERE term_id=? ORDER BY score {0} LIMIT ?".format(order_str), [term, count])
+    cur.execute("SELECT clue, score, path FROM term_clue WHERE term=? ORDER BY score {0} LIMIT ?".format(order_str), [term, count])
     return cur.fetchall()
 
 
 def get_scores(term):
-    cur.execute("SELECT clue, score FROM term_clue WHERE term_id=?", [term])
+    cur.execute("SELECT clue, score FROM term_clue WHERE term=?", [term])
     scores = {}
     for row in cur.fetchall():
         scores[row[0]] = row[1]
@@ -50,7 +50,7 @@ def get_scores(term):
 
 
 def get_term_clue(term, clue):
-    cur.execute("SELECT score, path FROM term_clue WHERE term_id=? AND clue=?", [term, clue])
+    cur.execute("SELECT score, path FROM term_clue WHERE term=? AND clue=?", [term, clue])
     row = cur.fetchone()
     if row is None:
         return None, None
@@ -58,7 +58,7 @@ def get_term_clue(term, clue):
 
 
 def clear_term_clues(term):
-    cur.execute("DELETE FROM term_clue WHERE term_id=?", [term])
+    cur.execute("DELETE FROM term_clue WHERE term=?", [term])
     con.commit()
     cur.execute("VACUUM")
     con.commit()

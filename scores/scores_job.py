@@ -21,10 +21,9 @@ def output_scores(term, id_to_title, pageranks):
     get_source_page_scores(term, paths, scores, excerpts, id_to_title, pageranks)
 
     print("Inserting: {0}".format(len(scores)))
-    term_id = term_utils.term_to_id(term)
     for clue in tqdm(scores):
         if term not in clue:
-            scores_database.insert_term_clue(term_id, clue, scores[clue], paths[clue], excerpts[clue])
+            scores_database.insert_term_clue(term, clue, scores[clue], paths[clue], excerpts[clue])
     scores_database.commit()
 
 

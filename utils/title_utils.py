@@ -38,7 +38,7 @@ def count_title_words(clue_title):
 def extract_title_words(title):
     title = trim_suffix(title)
     title_words = title.split('_')
-    
+
     cleaned_title_words = []
     for word in title_words:
         # Clean out &, "Mirmo!", "St."
@@ -46,5 +46,5 @@ def extract_title_words(title):
         cleaned_word = "".join(alphanumeric)
         if len(cleaned_word) > 0 and cleaned_word.lower() not in stop_words:
             cleaned_title_words.append(cleaned_word)
-    
+
     return list(map(lambda x:x.upper(), cleaned_title_words))
