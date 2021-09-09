@@ -4,19 +4,22 @@ import sqlite3
 
 from game import scrimmage
 from scores import scores_job, scores_database
-from page_extraction import page_extractor, source_page_extracts_job, page_extracts_database
+from page_extraction import page_extractor, source_page_extracts_job, page_extracts_database, page_extracts_job
 from page_downloads import page_downloads_database
 from pagerank import pagerank_database
 from utils import wiki_database, title_utils
 
 
-#source_page_extracts_job.job()
-
+#page_extracts_database.clear_non_source_entries()
+#print(page_extracts_database.get_extract('BEAK', wiki_database.title_to_id('Bivalvia')))
+#page_extracts_job.job()
 #scores_database.setup()
 #scores_job.output_scores_job()
-scrimmage.play(10)
 
-#print(page_extractor.count_terms('Berlin', 'CITY', page_downloads_database.get_content(wiki_database.title_to_id('Berlin'))))
+scrimmage.play(9)
+
+#print(page_extracts_database.get_extract('BEAK', wiki_database.title_to_id('Bivalvia')))
+#print(page_extractor.count_terms('Bivalvia', 'BEAK', page_downloads_database.get_content(wiki_database.title_to_id('Bivalvia'))))
 
 #print(pagerank_database.get_pagerank(wiki_database.title_to_id('Sucker_(zoology)')))
 

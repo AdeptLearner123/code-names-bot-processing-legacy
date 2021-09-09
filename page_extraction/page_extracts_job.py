@@ -17,7 +17,7 @@ def job():
 
     print("Getting empty entries")
     page_words = get_empty_pages()
-    
+
     print("Ensuring pages are downloaded")
     page_downloader.download_multi(page_words.keys())
 

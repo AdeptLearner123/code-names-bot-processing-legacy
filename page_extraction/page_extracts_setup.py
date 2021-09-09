@@ -26,7 +26,7 @@ def get_term_links():
         all_links = incoming.union(outgoing)
         double_links = incoming.intersection(outgoing)
         term_links[term] = all_links
-        
+
         for link in all_links:
             if link not in page_scores:
                 page_scores[link] = 1
@@ -67,7 +67,7 @@ def get_pair_links(term_links):
                 all_pair_links.update(pair_links)
                 print("{0} | {1}: {2} {3}".format(term1, term2, len(pair_links), len(links)))
 
-                pbar.update(1)    
+                pbar.update(1)
     return all_pair_links
 
 

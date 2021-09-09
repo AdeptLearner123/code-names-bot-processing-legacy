@@ -17,20 +17,20 @@ def play(seed):
     all_terms = list(TERM_PAGES.keys())
     all_terms.sort()
 
-    #blue = sample_terms(8, all_terms)
-    #red = sample_terms(9, all_terms)
-    #black = sample_terms(1, all_terms)
-    #blank = sample_terms(7, all_terms)
+    blue = sample_terms(8, all_terms)
+    red = sample_terms(9, all_terms)
+    black = sample_terms(1, all_terms)
+    blank = sample_terms(7, all_terms)
 
     #blue = ["BED", "APPLE", "DINOSAUR", "STATE", "AMAZON", "ANTARCTICA", "LION", "MOON"]
     #blue = ["AZTEC", "NOVEL", "ANTARCTICA"]
     #red = ["PART", "SNOW", "EUROPE", "AGENT", "NINJA", "BUCK", "ARM", "CENTER", "TRUNK"]
     #black = ["PANTS"]
     #blank = ["ANGEL", "POUND", "PIANO", "PIN", "ALPS", "MAMMOTH", "OCTOPUS"]
-    blue = ["BERLIN", "LONDON", "TOKYO"]
-    red = []
-    black = []
-    blank = []
+    #blue = ["BERLIN", "LONDON", "TOKYO"]
+    #red = []
+    #black = []
+    #blank = []
 
     starting_positive = blue.copy()
     starting_negative = red + black + blank
