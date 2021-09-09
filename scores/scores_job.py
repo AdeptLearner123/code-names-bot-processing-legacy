@@ -14,19 +14,21 @@ def output_scores(term, id_to_title, pageranks):
     print("Counting: " + term)
     paths = {}
     scores = {}
+    excerpts = {}
 
-    get_synonym_scores(term, paths, scores)
-    get_link_page_scores(term, paths, scores, id_to_title, pageranks)
-    get_source_page_scores(term, paths, scores, id_to_title, pageranks)
+    get_synonym_scores(term, paths, scores, excerpts)
+    get_link_page_scores(term, paths, scores, excerpts, id_to_title, pageranks)
+    get_source_page_scores(term, paths, scores, excerpts, id_to_title, pageranks)
 
     print("Inserting: {0}".format(len(scores)))
+    term_id = term_utils.term_to_id(term)
     for clue in tqdm(scores):
         if term not in clue:
-            scores_database.insert_term_clue(term, clue, scores[clue], paths[clue])
+            scores_database.insert_term_clue(term_id, clue, scores[clue], paths[clue], excerpts[clue])
     scores_database.commit()
 
 
-def get_synonym_scores(term, paths, scores):
+def get_synonym_scores(term, paths, scores, excerpts):
     for synonym in get_synonyms(term):
         if term not in synonym:
             words = synonym.split('_')
@@ -34,17 +36,20 @@ def get_synonym_scores(term, paths, scores):
             for word in words:
                 scores[word] = score
                 paths[word] = ""
+                excerpts[word] = ""
 
 
-def get_link_page_scores(term, paths, scores, id_to_title, pageranks):
+def get_link_page_scores(term, paths, scores, excerpts, id_to_title, pageranks):
     term_page_counts = page_extracts_database.get_term_page_counts(term, False)
     page_counts = {}
-    for word, page_id, count in term_page_counts:
+    page_excerpts = {}
+    for word, page_id, count, excerpt in term_page_counts:
         if count is None:
             continue
         if page_id not in page_counts or page_counts[page_id] < count:
             page_counts[page_id] = count
-    
+            page_excerpts[page_id] = excerpt
+
     print("Count: {0}".format(len(page_counts)))
     for page_id in page_counts:
         term_count = page_counts[page_id]
@@ -59,22 +64,26 @@ def get_link_page_scores(term, paths, scores, id_to_title, pageranks):
         clue = title_words[0]
         scores[clue] = get_score(pageranks[page_id], term_count)
         paths[clue] = title
+        excerpts[clue] = page_excerpts[page_id]
 
 
-def get_source_page_scores(term, paths, scores, id_to_title, pageranks):
+def get_source_page_scores(term, paths, scores, excerpts, id_to_title, pageranks):
     term_page_counts = page_extracts_database.get_term_page_counts(term, True)
     word_counts = {}
     word_page = {}
-    for word, page_id, count in tqdm(term_page_counts):
+    word_excerpts = {}
+    for word, page_id, count, excerpt in tqdm(term_page_counts):
         if word not in word_counts or word_counts[word] < count:
             word_counts[word] = count
             word_page[word] = page_id
+            word_excerpts[word] = excerpt
 
     for word in word_counts:
         score = get_score(pageranks[word_page[word]], word_counts[word])
         if word not in scores or scores[word] < score:
             scores[word] = score
             paths[word] = id_to_title[word_page[word]]
+            excerpts[word] = word_excerpts[word]
 
 
 def get_score(pagerank, word_count):
@@ -94,5 +103,5 @@ def output_scores_job():
 
     for term in term_utils.get_terms():
         output_scores(term, id_to_title, pageranks)
-    
+
     print("--- %s seconds ---" % (time.time() - start_time))

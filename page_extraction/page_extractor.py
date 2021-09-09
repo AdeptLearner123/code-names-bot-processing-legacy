@@ -4,7 +4,7 @@ import re
 from nltk import word_tokenize
 from nltk import sent_tokenize
 from nltk.tag.perceptron import PerceptronTagger
-tagger = PerceptronTagger() 
+tagger = PerceptronTagger()
 from nltk.stem import WordNetLemmatizer
 import spacy
 nlp = spacy.load("en_core_web_sm")
@@ -24,7 +24,7 @@ def count_terms(page_title, target_term, text):
 
 def count_terms_multi(page_title, terms, text):
     page_title = trim_suffix(page_title)
-    
+
     sentences = get_sentences(text)
     sentence_words_list, sentence_ne_list = get_sentence_words(sentences, terms)
 
@@ -52,7 +52,7 @@ def extract_noun_chunks(text):
     root_excerpts = dict()
     lemmatizer = WordNetLemmatizer()
     sentences = get_sentences(text)
-    
+
     for sentence in sentences:
         doc = nlp(sentence)
         for chunk in doc.noun_chunks:
@@ -171,7 +171,7 @@ def aggregate_ne_list(sentence_ne_list, terms):
                 if ne_word in terms:
                     term_ne[ne_word].add(ne)
             processed_ne.add(ne)
-    
+
     for ne in processed_ne:
         ne_counts[ne] = 0
         ne_sentence_counts[ne] = []

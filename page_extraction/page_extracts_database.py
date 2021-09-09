@@ -96,7 +96,7 @@ def get_extract(word, page_id):
 
 
 def get_term_page_counts(term, is_source):
-    cur.execute("SELECT word, page_id, count FROM page_extracts WHERE is_source=? AND term=?", [is_source, term])
+    cur.execute("SELECT word, page_id, count, excerpt FROM page_extracts WHERE is_source=? AND term=?", [is_source, term])
     return cur.fetchall()
 
 

@@ -99,3 +99,7 @@ def get_word_tag_to_pos():
                 inflected_term = inflections[pos][0].upper()
                 word_tag_to_term_pos[(inflected_term, pos)] = (synonym, pos[0:2])
     return word_tag_to_term_pos
+
+
+def term_to_id(term):
+    return TERMS.index(term)
