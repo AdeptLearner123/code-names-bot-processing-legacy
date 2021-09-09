@@ -3,10 +3,9 @@ import time
 
 from utils import wiki_database
 from utils.title_utils import extract_title_words
-from page_extraction import page_extractor
-from page_extraction import page_extracts_database
-from page_downloads import page_downloads_database
-from page_downloads import page_downloader
+from page_extraction import page_extractor, page_extracts_database
+from page_downloads import page_downloads_database, page_downloader
+from pagerank import pagerank_database
 from utils import term_utils
 
 def get_source_page_counts(id, title_to_id, pageranks):
@@ -44,13 +43,16 @@ def page_ids_to_words(ids, source_title, title_to_id, pageranks):
 def job():
     start_time = time.time()
 
+    title_to_id = wiki_database.get_all_titles_dict()
+    pageranks = pagerank_database.get_pageranks()
+
     all_source_ids = term_utils.get_all_source_ids()
     page_downloader.download_multi(all_source_ids)
 
     with tqdm(total=len(all_source_ids)) as pbar:
         for term in term_utils.get_terms():
             for id in term_utils.get_source_ids(term):
-                source_page_counts, source_page_excerpts = get_source_page_counts(id)
+                source_page_counts, source_page_excerpts = get_source_page_counts(id, title_to_id, pageranks)
                 if source_page_counts is None:
                     continue
                 for noun in source_page_counts:

@@ -4,14 +4,17 @@ import sqlite3
 
 from game import scrimmage
 from scores import scores_job, scores_database
-from page_extraction import page_extractor, source_page_extracts_job
+from page_extraction import page_extractor, source_page_extracts_job, page_extracts_database
 from page_downloads import page_downloads_database
 from pagerank import pagerank_database
 from utils import wiki_database, title_utils
 
+
+#source_page_extracts_job.job()
+
 #scores_database.setup()
 #scores_job.output_scores_job()
-#scrimmage.play(10)
+scrimmage.play(10)
 
 #print(page_extractor.count_terms('Berlin', 'CITY', page_downloads_database.get_content(wiki_database.title_to_id('Berlin'))))
 
@@ -26,7 +29,7 @@ from utils import wiki_database, title_utils
 #  if len(words) == 1 and words[0].upper() == "SUCKER":
 #    print(title)
 
-
+"""
 title_to_id = wiki_database.get_all_titles_dict()
 pageranks = pagerank_database.get_pageranks()
 #titles = ['Octopus', 'Berlin', 'Bermuda', 'Electric_battery']
@@ -38,3 +41,4 @@ for title in titles:
   word_counts = sorted(word_counts.items(), key=lambda item:item[1], reverse=True)[:15]
   for word, count in word_counts:
     print(word, count)
+"""
